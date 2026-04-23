@@ -1,10 +1,14 @@
 # Tasks — Sistem Penjadwalan Kuliah
 ## Jurusan Matematika FMIPA Universitas Riau
 
-**Versi:** 1.2.0  
+**Versi:** 1.6.0  
 **Tanggal:** April 2026  
 **Metodologi:** Spec-Driven Development  
 **Status:** Ready to Implement  
+**Changelog v1.6.0:** Tambah T4.1.13 — implementasi `check_floor_priority()` SC-05; tambah T4.3.10 — unit test SC-05; tambah field `override_floor_priority` ke model JadwalAssignment (T1.2.11); update T1.3.1 migrasi.  
+**Changelog v1.5.0:** Restrukturisasi role — `kaprodi` → `ketua_jurusan`; tambah `tendik_prodi` dan `tendik_jurusan`; update model User (7 role); update RBAC constants; tambah endpoint approve/publish sesi.  
+**Changelog v1.4.0:** HC-04 dikembalikan ke DEFERRED; T4.1.5b dan T4.3.3b dibatalkan; kolom model Dosen dikembalikan ke `bkd_limit_sks` (NULLABLE, placeholder).  
+**Changelog v1.3.0:** Revisi akses endpoint team teaching — PUT/POST dipindahkan ke Dosen (own), GET tetap untuk semua role termasuk EDITOR_ROLES; revisi T4.1.5 — aktifkan `check_bkd_minimum()` sebagai WARNING (bukan deferred); ganti `bkd_limit_sks` → `bkd_min_sks` di model Dosen; tambah unit test HC-04; update T7.4.6 dan T7.7 untuk halaman team teaching dosen; update kapasitas default ruang 45.  
 **Changelog v1.2.0:** Tambah task role baru (`sekretaris_jurusan`, `koordinator_prodi`) ke model User dan RBAC; tambah task model `DosenPreference` dan `TeamTeachingOrder`; tambah task endpoint preferensi dosen (pre-schedule/post-draft) dan team teaching scheduling; tambah task SC-03 ke conflict engine; update test role isolation.  
 **Changelog v1.1.0:** Tambah task HC-07/08/09; defer task BKD (T4.1.5); update seed timeslot ke 15 slot tetap; tambah task data cleaning ETL; revisi test fixtures.
 
@@ -51,19 +55,19 @@
 
 Buat satu file per model sesuai `design.md §2.2`. Setiap task mencakup model + index + relasi.
 
-- [ ] **T1.2.1** — Model `User` (`backend/app/models/user.py`) — tambahkan enum role: `admin`, `sekretaris_jurusan`, `koordinator_prodi`, `kaprodi`, `dosen`
+- [ ] **T1.2.1** — Model `User` (`backend/app/models/user.py`) — enum role: `admin`, `ketua_jurusan`, `sekretaris_jurusan`, `koordinator_prodi`, `dosen`, `tendik_prodi`, `tendik_jurusan`; kolom `prodi_id` NULLABLE (untuk `koordinator_prodi` dan `tendik_prodi`)
 - [ ] **T1.2.2** — Model `Prodi` (`backend/app/models/prodi.py`)
 - [ ] **T1.2.3** — Model `Kurikulum` dengan relasi FK ke `Prodi`
 - [ ] **T1.2.4** — Model `MataKuliah` dengan relasi FK ke `Kurikulum`
 - [ ] **T1.2.5** — Model `MataKuliahKelas` dengan relasi FK ke `MataKuliah`
 - [ ] **T1.2.6** — Model `Ruang`
 - [ ] **T1.2.7** — Model `Timeslot`
-- [ ] **T1.2.8** — Model `Dosen` dengan relasi FK ke `Prodi` (homebase) dan `User`
+- [ ] **T1.2.8** — Model `Dosen` dengan relasi FK ke `Prodi` (homebase) dan `User`; kolom `bkd_limit_sks` (SMALLINT, NULLABLE) sebagai placeholder untuk fase berikutnya — tidak divalidasi di Fase 1
 - [ ] **T1.2.9** — Model `DosenUnavailability` dengan relasi FK ke `Dosen` dan `Timeslot`
 - [ ] **T1.2.9b** — Model `DosenPreference` dengan kolom `fase` (`pre_schedule`/`post_draft`), `is_violated`, relasi FK ke `Dosen`, `Timeslot`, `SesiJadwal`
 - [ ] **T1.2.9c** — Model `TeamTeachingOrder` dengan kolom `urutan_pra_uts`, `urutan_pasca_uts`, relasi FK ke `JadwalAssignment` dan `Dosen`
 - [ ] **T1.2.10** — Model `SesiJadwal`
-- [ ] **T1.2.11** — Model `JadwalAssignment` dengan relasi FK ke `SesiJadwal`, `MataKuliahKelas`, `Dosen` (x2), `Timeslot`, `Ruang`; tambahkan index untuk conflict detection query
+- [ ] **T1.2.11** — Model `JadwalAssignment` dengan relasi FK ke `SesiJadwal`, `MataKuliahKelas`, `Dosen` (x2), `Timeslot`, `Ruang`; tambahkan field `override_floor_priority` (BOOLEAN, DEFAULT FALSE); tambahkan index untuk conflict detection query
 - [ ] **T1.2.12** — Model `ConflictLog` dengan kolom `assignment_ids` (PostgreSQL Array) dan `detail` (JSONB)
 
 ### 1.3 Migrasi Database
@@ -83,7 +87,10 @@ Buat satu file per model sesuai `design.md §2.2`. Setiap task mencakup model + 
 
 - [ ] **T2.1.1** — Implementasi JWT utility di `backend/app/core/auth.py`: `create_token`, `verify_token`, `get_current_user`
 - [ ] **T2.1.2** — Implementasi password hashing dengan bcrypt di `core/security.py`
-- [ ] **T2.1.3** — Implementasi RBAC helper di `core/permissions.py`: decorator/dependency `require_role(roles: list)`; definisikan grup role `EDITOR_ROLES = [admin, sekretaris_jurusan, koordinator_prodi]` untuk digunakan di seluruh endpoint edit
+- [ ] **T2.1.3** — Implementasi RBAC helper di `core/permissions.py`: decorator/dependency `require_role(roles: list)`; definisikan konstanta:
+  - `EDITOR_ROLES_JURUSAN = [admin, sekretaris_jurusan, tendik_jurusan]`
+  - `EDITOR_ROLES_PRODI = [admin, sekretaris_jurusan, tendik_jurusan, koordinator_prodi, tendik_prodi]`
+  - `VIEWER_ROLES = [ketua_jurusan]`
 - [ ] **T2.1.4** — Router `POST /auth/login` — verifikasi credentials, kembalikan JWT
 - [ ] **T2.1.5** — Router `GET /auth/me` — kembalikan profil user aktif
 - [ ] **T2.1.6** — Test: login sukses, login gagal, token expired, akses tanpa token
@@ -109,14 +116,15 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 **Tujuan:** Membangun endpoint untuk manajemen sesi jadwal dan penugasan (assignment).
 
-- [ ] **T3.1** — CRUD `SesiJadwal`: `GET /sesi`, `POST /sesi`, `PUT /sesi/{id}` (termasuk transisi status Draft → Aktif → Arsip)
-- [ ] **T3.2** — `GET /sesi/{id}/assignments` — kembalikan daftar assignment dengan filtering (prodi, hari, semester) dan pagination; pastikan filter role (Kaprodi hanya melihat prodi sendiri)
-- [ ] **T3.3** — `POST /sesi/{id}/assignments` — tambah assignment baru; lakukan validasi dasar (dosen aktif, timeslot & ruang valid, sesi masih Draft/Aktif); akses: `EDITOR_ROLES` + `kaprodi`
-- [ ] **T3.4** — `PUT /sesi/{id}/assignments/{aid}` — update assignment; catat `updated_at`; akses: `EDITOR_ROLES` + `kaprodi`
-- [ ] **T3.5** — `DELETE /sesi/{id}/assignments/{aid}` — hapus assignment (hard delete); akses: `EDITOR_ROLES` only
-- [ ] **T3.7** — Endpoint team teaching: `GET /sesi/{id}/assignments/{aid}/team-teaching`, `PUT /sesi/{id}/assignments/{aid}/team-teaching` (set urutan masuk kelas pra-UTS), `POST /sesi/{id}/assignments/{aid}/team-teaching/swap` (jadwalkan pertukaran pasca-UTS); validasi bahwa assignment memiliki `dosen2_id` (bukan NULL)
-- [ ] **T3.8** — Endpoint `GET /sesi/{id}/preferences-summary` — kembalikan ringkasan pelanggaran preferensi dosen: total preferensi, total dilanggar, breakdown per dosen; akses: `EDITOR_ROLES`
-- [ ] **T3.6** — Test: buat assignment valid, buat assignment dengan data tidak lengkap, update, hapus, filter per prodi; test akses role `sekretaris_jurusan` dan `koordinator_prodi` dapat edit; test akses `kaprodi` hanya dapat usulan; test akses `dosen` ditolak
+- [ ] **T3.1** — CRUD `SesiJadwal`: `GET /sesi`, `POST /sesi`, `PUT /sesi/{id}` (transisi status Draft → Aktif → Arsip; akses: `EDITOR_ROLES_JURUSAN`); tambah `PATCH /sesi/{id}/approve` dan `PATCH /sesi/{id}/publish` (akses: `ketua_jurusan`)
+- [ ] **T3.2** — `GET /sesi/{id}/assignments` — kembalikan daftar assignment dengan filtering (prodi, hari, semester) dan pagination; filter role: `koordinator_prodi` dan `tendik_prodi` hanya melihat prodi sendiri; `dosen` hanya melihat assignment dirinya; `ketua_jurusan` melihat semua
+- [ ] **T3.3** — `POST /sesi/{id}/assignments` — tambah assignment baru; validasi dasar (dosen aktif, timeslot & ruang valid, sesi masih Draft/Aktif); akses: `EDITOR_ROLES_PRODI`
+- [ ] **T3.4** — `PUT /sesi/{id}/assignments/{aid}` — update assignment; catat `updated_at`; akses: `EDITOR_ROLES_PRODI`
+- [ ] **T3.4b** — `PATCH /sesi/{id}/assignments/{aid}/override-floor` — toggle `override_floor_priority`; akses: `EDITOR_ROLES_JURUSAN`; kembalikan assignment yang diupdate
+- [ ] **T3.5** — `DELETE /sesi/{id}/assignments/{aid}` — hapus assignment (hard delete); akses: `EDITOR_ROLES_JURUSAN`
+- [ ] **T3.7** — Endpoint team teaching: `GET /sesi/{id}/assignments/{aid}/team-teaching` (akses: semua role termasuk dosen own), `PUT /sesi/{id}/assignments/{aid}/team-teaching` (set urutan masuk kelas pra-UTS; akses: **Dosen own saja**), `POST /sesi/{id}/assignments/{aid}/team-teaching/swap` (jadwalkan pertukaran pasca-UTS; akses: **Dosen own saja**); validasi bahwa assignment memiliki `dosen2_id` (bukan NULL) dan bahwa dosen yang mengakses adalah dosen1 atau dosen2 dari assignment tersebut
+- [ ] **T3.8** — Endpoint `GET /sesi/{id}/preferences-summary` — kembalikan ringkasan pelanggaran preferensi dosen: total preferensi, total dilanggar, breakdown per dosen; akses: `EDITOR_ROLES_JURUSAN`, `ketua_jurusan`
+- [ ] **T3.6** — Test: buat assignment valid, buat assignment dengan data tidak lengkap, update, hapus, filter per prodi; test akses `sekretaris_jurusan` dan `tendik_jurusan` dapat edit semua prodi; test akses `koordinator_prodi` dan `tendik_prodi` hanya dapat edit prodi sendiri; test akses `ketua_jurusan` hanya read; test akses `dosen` ditolak untuk edit
 
 ---
 
@@ -130,7 +138,8 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 - [ ] **T4.1.2** — Buat `ConflictEngine` class di `backend/app/services/conflict_engine.py` dengan method `run(sesi_id)` yang mengorkestrasikan semua rule
 - [ ] **T4.1.3** — Implementasi `check_lecturer_double()` — HC-01: deteksi dosen1 atau dosen2 di timeslot yang sama dalam satu sesi
 - [ ] **T4.1.4** — Implementasi `check_room_double()` — HC-02: deteksi ruang yang sama di timeslot yang sama
-- [-] **T4.1.5** — ~~Implementasi `check_bkd_limit()` — HC-04~~ **DEFERRED** — Ditunda ke Fase berikutnya; data dosen belum dinormalisasi dan struktur BKD masih difinalisasi. Kolom `bkd_limit_sks` tersedia di skema tetapi tidak divalidasi.
+- [-] **T4.1.5** — ~~Implementasi `check_bkd_limit()` — HC-04~~ **DEFERRED** — Ditunda ke Fase berikutnya. Ketentuan BKD bertingkat (minimum 9 SKS, distribusi berdasarkan masa kerja) belum dapat diimplementasikan karena data masa kerja dosen belum tersedia. Kolom `bkd_limit_sks` tersedia di skema sebagai placeholder.
+- [-] **T4.1.5b** — ~~Implementasi `check_bkd_minimum()`~~ **DIBATALKAN** — sesuai revisi v1.4.0; HC-04 kembali ke DEFERRED.
 - [ ] **T4.1.6** — Implementasi `check_lecturer_unavail()` — HC-06: deteksi assignment pada slot dosen_unavailability
 - [ ] **T4.1.7** — Implementasi `check_parallel_mismatch()` — HC-07: kelompokkan assignment berdasarkan `mata_kuliah_id` induk; ERROR jika kelas paralel dalam satu MK memiliki `timeslot_id` berbeda; pesan harus menyebut kelas mana saja yang bermasalah
 - [ ] **T4.1.8** — Implementasi `check_student_daily_load()` — HC-08: untuk setiap (prodi, semester, hari), hitung jumlah MK dan total SKS; ERROR jika jumlah_mk > 2 atau total_sks > 6
@@ -138,6 +147,7 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 - [ ] **T4.1.10** — Implementasi `check_student_conflict()` — SC-01: deteksi mata kuliah satu semester satu prodi yang dijadwalkan bersamaan (WARNING; pelengkap informatif dari HC-08)
 - [ ] **T4.1.11** — Implementasi `check_workload_equity()` — SC-02: hitung simpangan baku beban SKS per prodi, flag sebagai WARNING jika std dev > threshold (konfigurasi)
 - [ ] **T4.1.12** — Implementasi `check_lecturer_preference()` — SC-03: untuk setiap dosen dalam sesi, bandingkan `dosen_preference` dengan assignment aktual; update `is_violated = TRUE` pada preferensi yang tidak dipenuhi; kembalikan WARNING `LECTURER_PREFERENCE_VIOLATED` per preferensi yang dilanggar; simpan ringkasan `total_violated` ke `conflict_log.detail`
+- [ ] **T4.1.13** — Implementasi `check_floor_priority()` — SC-05: untuk setiap timeslot dalam sesi, ambil semua assignment yang memiliki `ruang_id` dan `dosen.tgl_lahir` terisi dan `override_floor_priority = FALSE`; urutkan dosen berdasarkan usia (senior = lebih tua); bandingkan dengan urutan lantai ruang; WARNING `FLOOR_PRIORITY_VIOLATED` jika dosen senior ditempatkan di lantai lebih tinggi dari dosen yang lebih muda; lewati jika `ruang.lantai` NULL
 
 ### 4.2 Integrasi API
 
@@ -150,11 +160,13 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 - [ ] **T4.3.1** — Unit test HC-01: fixture dua assignment dosen sama & timeslot sama → assert ERROR `LECTURER_DOUBLE`
 - [ ] **T4.3.2** — Unit test HC-02: fixture dua assignment ruang sama & timeslot sama (ruang_id tidak NULL) → assert ERROR `ROOM_DOUBLE`; pastikan tidak ERROR jika ruang_id NULL
 - [-] **T4.3.3** — ~~Unit test HC-04~~ **DEFERRED** — sesuai T4.1.5
+- [-] **T4.3.3b** — ~~Unit test HC-04 minimum~~ **DIBATALKAN** — sesuai revisi v1.4.0
 - [ ] **T4.3.4** — Unit test HC-07: fixture tiga kelas paralel (A, B, C) di mana kelas C di slot berbeda → assert ERROR `PARALLEL_MISMATCH`; pastikan tidak ERROR jika semua kelas di slot sama
 - [ ] **T4.3.5** — Unit test HC-08: fixture prodi+semester dengan 3 MK di hari yang sama → assert ERROR `STUDENT_DAILY_OVERLOAD`; fixture 2 MK (6 SKS) → assert tidak ERROR
 - [ ] **T4.3.6** — Unit test HC-09: fixture dosen dengan 3 MK di hari yang sama → assert ERROR `LECTURER_DAILY_OVERLOAD`; fixture 1 MK sebagai dosen2 + 1 MK sebagai dosen1 di hari sama (total 2) → assert tidak ERROR
 - [ ] **T4.3.7** — Unit test SC-01: fixture dua MK semester sama & prodi sama di timeslot sama → assert WARNING `STUDENT_CONFLICT`
 - [ ] **T4.3.9** — Unit test SC-03: fixture dosen dengan preferensi hari Senin, assignment dosen di hari Rabu → assert WARNING `LECTURER_PREFERENCE_VIOLATED` dan `is_violated = TRUE`; fixture dosen dengan preferensi hari Senin, assignment di hari Senin → assert tidak ada WARNING SC-03
+- [ ] **T4.3.10** — Unit test SC-05: fixture dua assignment di timeslot sama — dosen senior (lahir 1965) di lantai 3, dosen junior (lahir 1985) di lantai 1 → assert WARNING `FLOOR_PRIORITY_VIOLATED`; fixture dosen senior di lantai 1, dosen junior di lantai 3 → assert tidak ada WARNING; fixture assignment dengan `override_floor_priority = TRUE` → assert tidak ada WARNING meskipun urutan lantai terbalik; fixture tanpa `tgl_lahir` atau tanpa `ruang.lantai` → assert tidak ada WARNING
 - [ ] **T4.3.8** — Integration test: import jadwal dari fixture Excel (Genap 2025-2026), jalankan `check-conflicts`, verifikasi jenis konflik yang diketahui manual muncul dengan severity yang benar
 
 ---
@@ -234,30 +246,35 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 - [ ] **T7.4.3** — Form Tambah Assignment: dropdown beruntun (Prodi → Kurikulum → Semester → Kelas MK → Dosen → Timeslot → Ruang)
 - [ ] **T7.4.4** — Form Edit Assignment: pre-fill dari data existing
 - [ ] **T7.4.5** — Indikator konflik inline di tabel assignment: warna baris merah (ERROR) / kuning (WARNING); tooltip pesan konflik
-- [ ] **T7.4.6** — Halaman Team Teaching (`/sesi/:id/team-teaching`): tabel assignment team teaching (dosen2_id tidak NULL); form set urutan masuk kelas pra-UTS; tombol "Swap Pasca-UTS" untuk menjadwalkan pertukaran
+- [ ] **T7.4.6** — Halaman Team Teaching (`/sesi/:id/team-teaching`): tabel assignment team teaching (dosen2_id tidak NULL); tampilkan status konfigurasi per assignment (sudah diatur / belum); semua role pengelola hanya dapat melihat ringkasan — tombol edit tidak tersedia untuk mereka
 
 ### 7.5 Halaman Deteksi Konflik
 
 - [ ] **T7.5.1** — Halaman Konflik (`/sesi/:id/konflik`): tombol "Periksa Konflik", ringkasan (n ERROR, n WARNING), tabel konflik dengan kolom: jenis, severity, pesan, terlibat, status resolved
-- [ ] **T7.5.2** — Aksi "Tandai Resolved" per baris konflik
+- [ ] **T7.5.2** — Aksi "Tandai Resolved" per baris konflik (akses: `EDITOR_ROLES_JURUSAN`)
 - [ ] **T7.5.3** — Filter konflik berdasarkan jenis dan severity
 
 ### 7.6 Halaman Laporan
 
-- [ ] **T7.6.1** — Halaman Rekap SKS (`/laporan/sks`): tabel dosen × kolom beban SKS per prodi + total; visual bar per dosen (warna hijau/kuning/merah sesuai ambang BKD)
+- [ ] **T7.6.1** — Halaman Rekap SKS (`/laporan/sks`): tabel dosen × kolom beban SKS per prodi + total; visual bar per dosen
 - [ ] **T7.6.2** — Halaman Peta Ruang (`/laporan/ruang`): grid hari × timeslot per ruang; sel berisi nama MK atau kosong
 - [ ] **T7.6.3** — Halaman Ringkasan Preferensi (`/laporan/preferensi`): tabel per dosen — jumlah preferensi diajukan, jumlah dipenuhi, jumlah dilanggar; filter per fase (pre-schedule/post-draft)
 
-### 7.7 Halaman Dosen (Role: Dosen)
+### 7.7 Halaman Ketua Jurusan
 
-- [ ] **T7.7.1** — Halaman Jadwal Saya (`/jadwal-saya`): tampilan tabel mingguan jadwal mengajar dosen aktif
-- [ ] **T7.7.2** — Halaman Unavailability (`/preferensi`): grid timeslot per hari; toggle slot tidak tersedia; simpan ke `POST /dosen/{id}/unavailability`
-- [ ] **T7.7.3** — Halaman Preferensi Hari (`/preferensi/hari`): form pengajuan preferensi hari mengajar; pilih fase (pre-schedule/post-draft), pilih timeslot yang diinginkan, isi catatan; tampilkan status preferensi yang sudah diajukan (dipenuhi/dilanggar)
+- [ ] **T7.7.0** — Halaman Review Jadwal (`/sesi/:id/review`): tampilan read-only jadwal lengkap; ringkasan konflik (jumlah ERROR/WARNING); tombol "Setujui" dan "Minta Revisi"; tombol "Sahkan" (hanya aktif jika status Disetujui)
 
-### 7.8 Halaman Import/Export (Admin)
+### 7.8 Halaman Dosen (Role: Dosen)
 
-- [ ] **T7.8.1** — Halaman Import (`/import`): upload file Excel untuk data master dan jadwal; tampilkan hasil (berhasil/gagal/dilewati)
-- [ ] **T7.8.2** — Tombol Export di halaman Detail Sesi: panggil `GET /sesi/{id}/export`, trigger download file
+- [ ] **T7.8.1** — Halaman Jadwal Saya (`/jadwal-saya`): tampilan tabel mingguan jadwal mengajar dosen aktif
+- [ ] **T7.8.2** — Halaman Unavailability (`/preferensi`): grid timeslot per hari; toggle slot tidak tersedia; simpan ke `POST /dosen/{id}/unavailability`
+- [ ] **T7.8.3** — Halaman Preferensi Hari (`/preferensi/hari`): form pengajuan preferensi hari mengajar; pilih fase (pre-schedule/post-draft), pilih timeslot yang diinginkan, isi catatan; tampilkan status preferensi yang sudah diajukan (dipenuhi/dilanggar)
+- [ ] **T7.8.4** — Halaman Team Teaching Dosen (`/team-teaching`): tampilkan daftar MK yang diampu sebagai team teaching; form set urutan masuk kelas pra-UTS per assignment; tombol "Swap Pasca-UTS"; hanya tampil jika dosen memiliki assignment dengan `dosen2_id` tidak NULL
+
+### 7.9 Halaman Import/Export (Admin)
+
+- [ ] **T7.9.1** — Halaman Import (`/import`): upload file Excel untuk data master dan jadwal; tampilkan hasil (berhasil/gagal/dilewati)
+- [ ] **T7.9.2** — Tombol Export di halaman Detail Sesi: panggil `GET /sesi/{id}/export`, trigger download file
 
 ---
 
@@ -278,7 +295,7 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 - [ ] **T8.2.1** — Jalankan full workflow: import `db.xlsx` → import jadwal historis (Genap 2025-2026) → periksa konflik → verifikasi konflik yang dideteksi sesuai yang diketahui manual
 - [ ] **T8.2.2** — Validasi seluruh 10 acceptance criteria dari `requirements.md §5`
-- [ ] **T8.2.3** — Test role isolation: login sebagai `sekretaris_jurusan`, verifikasi dapat edit jadwal tetapi tidak dapat akses manajemen user; login sebagai `koordinator_prodi`, verifikasi dapat edit jadwal; login sebagai `kaprodi`, verifikasi hanya data prodi sendiri yang terlihat; login sebagai `dosen`, verifikasi hanya data diri sendiri dan dapat mengajukan preferensi
+- [ ] **T8.2.3** — Test role isolation: login sebagai `sekretaris_jurusan` → dapat edit jadwal semua prodi, tidak dapat akses manajemen user; login sebagai `tendik_jurusan` → dapat edit jadwal semua prodi; login sebagai `koordinator_prodi` → hanya dapat edit jadwal prodi sendiri; login sebagai `tendik_prodi` → hanya dapat edit jadwal prodi sendiri; login sebagai `ketua_jurusan` → hanya read + approve/publish; login sebagai `dosen` → hanya data diri sendiri, dapat mengajukan preferensi dan mengatur team teaching untuk MK yang ia ampu; verifikasi dosen tidak dapat mengatur team teaching untuk MK yang bukan miliknya
 
 ---
 

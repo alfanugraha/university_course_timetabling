@@ -1,9 +1,11 @@
 # Design — Sistem Penjadwalan Kuliah
 ## Jurusan Matematika FMIPA Universitas Riau
 
-**Versi:** 1.2.0  
+**Versi:** 1.6.0  
 **Tanggal:** April 2026  
 **Status:** Draft  
+**Changelog v1.6.0:** Tambah SC-05 ke enum conflict_log (`FLOOR_PRIORITY_VIOLATED`); tambah algoritma `check_floor_priority()` ke conflict engine; update kolom `dosen.tgl_lahir` sebagai basis perhitungan; tambah field `override_floor_priority` ke `jadwal_assignment`.  
+**Changelog v1.5.0:** Restrukturisasi role — `kaprodi` diganti `ketua_jurusan`; tambah `tendik_prodi` dan `tendik_jurusan`; update tabel `user` (7 role); update semua endpoint dengan role baru.  
 **Changelog v1.2.0:** Tambah role `sekretaris_jurusan` dan `koordinator_prodi` ke tabel `user`; tambah tabel `team_teaching_order` untuk pengaturan urutan masuk kelas dan swap setelah UTS; perluas tabel `dosen_preference` (ganti `dosen_unavailability` untuk preferensi hari) dengan kolom `fase`, `status`, dan `is_violated`; tambah endpoint preferensi dosen dan team teaching; update RBAC di seluruh endpoint; tambah SC-03 ke conflict engine.  
 **Changelog v1.1.0:** Revisi timeslot menjadi 3 sesi tetap per hari (15 slot total); tambah algoritma HC-07/HC-08/HC-09; keputusan struktur dosen (dua kolom); ruang opsional dipertegas; catatan ETL data tidak rapi; update enum `conflict_log.jenis`.
 
@@ -141,13 +143,13 @@ Kelas paralel dari setiap mata kuliah yang akan dijadwalkan.
 #### `ruang`
 Ruang kuliah yang tersedia.
 
-> **Fase 1:** Data ruang dikelola oleh pihak Fakultas, bukan Jurusan. Tabel ini tersedia di skema dan dapat diisi kapan saja, tetapi **tidak diwajibkan**. Kolom `ruang_id` pada `jadwal_assignment` bersifat NULLABLE; HC-02 hanya aktif jika kolom tersebut terisi.
+> **Fase 1:** Data ruang dikelola oleh pihak Fakultas, bukan Jurusan. Tabel ini tersedia di skema dan dapat diisi kapan saja, tetapi **tidak diwajibkan**. Kolom `ruang_id` pada `jadwal_assignment` bersifat NULLABLE; HC-02 hanya aktif jika kolom tersebut terisi. Kapasitas default ruang adalah **45 orang** jika kolom `kapasitas` belum diisi.
 
 | Kolom | Tipe | Constraint | Keterangan |
 |-------|------|------------|------------|
 | `id` | UUID | PK | |
 | `nama` | VARCHAR(20) | UNIQUE, NOT NULL | Misal: `R.101`, `LAB I` |
-| `kapasitas` | SMALLINT | NULLABLE | Kapasitas tempat duduk |
+| `kapasitas` | SMALLINT | DEFAULT 45 | Kapasitas tempat duduk; default 45 jika belum diisi |
 | `lantai` | SMALLINT | NULLABLE | |
 | `gedung` | VARCHAR(100) | NULLABLE | |
 | `jenis` | VARCHAR(20) | DEFAULT `Kelas` | `Kelas` / `Lab` / `Seminar` |
@@ -184,7 +186,7 @@ Dengan 5 hari (Senin–Jumat), total timeslot = 15 baris seed data (kode: `mon_s
 #### `dosen`
 Data dosen pengampu.
 
-> **Fase 1 — Status Data:** Data dosen belum diinput penuh. ETL importer harus toleran terhadap baris dosen yang kosong, duplikat, atau referensi tidak konsisten; baris bermasalah dicatat sebagai `import_warning` dan dilewati (tidak menyebabkan import gagal total). Kolom `bkd_limit_sks` tersedia namun validasinya tidak aktif hingga Fase 2.
+> **Fase 1 — Status Data:** Data dosen belum diinput penuh. ETL importer harus toleran terhadap baris dosen yang kosong, duplikat, atau referensi tidak konsisten; baris bermasalah dicatat sebagai `import_warning` dan dilewati (tidak menyebabkan import gagal total). Kolom `bkd_limit_sks` tersedia sebagai placeholder untuk fase berikutnya; validasinya tidak aktif di Fase 1.
 >
 > **Keputusan Struktur Dosen:** Satu mata kuliah diampu oleh maksimal **dua dosen**. Pilihannya adalah dua kolom (`dosen1_id`, `dosen2_id`) pada `jadwal_assignment`, atau dua baris terpisah. Keputusan: **dua kolom**. Alasan: jumlah dosen per kelas bersifat tetap (maks 2), dua kolom lebih efisien untuk query conflict detection (tidak perlu self-join), dan sesuai dengan format Excel existing (kolom `Dosen I` dan `Dosen II`). Jika di kemudian hari ada kebutuhan lebih dari 2 dosen, tambahkan tabel `jadwal_assignment_dosen` sebagai many-to-many.
 
@@ -198,7 +200,7 @@ Data dosen pengampu.
 | `jabfung` | VARCHAR(50) | NULLABLE | Jabatan fungsional |
 | `kjfd` | VARCHAR(100) | NULLABLE | Kelompok bidang keilmuan |
 | `homebase_prodi_id` | UUID | FK → prodi, NULLABLE | |
-| `bkd_limit_sks` | SMALLINT | DEFAULT 16 | Batas SKS per semester |
+| `bkd_limit_sks` | SMALLINT | NULLABLE | Placeholder untuk batas BKD fase berikutnya; tidak divalidasi di Fase 1 |
 | `tgl_lahir` | DATE | NULLABLE | |
 | `status` | VARCHAR(20) | DEFAULT `Aktif` | `Aktif` / `Non-Aktif` / `Pensiun` |
 | `user_id` | UUID | FK → user, NULLABLE | Link ke akun login |
@@ -242,7 +244,7 @@ Preferensi hari mengajar yang diajukan dosen. Bersifat **soft** — tidak wajib 
 #### `team_teaching_order`
 Pengaturan urutan masuk kelas untuk mata kuliah team teaching. Satu baris per dosen per kelas paralel per sesi.
 
-> **Catatan:** Untuk mata kuliah yang diampu dua dosen (team teaching), tabel ini mencatat siapa yang masuk duluan di kelas mana pada paruh pertama semester (pra-UTS), dan siapa yang masuk setelah pertukaran (pasca-UTS). Pertukaran dijadwalkan secara eksplisit oleh Admin.
+> **Catatan:** Untuk mata kuliah yang diampu dua dosen (team teaching), tabel ini mencatat siapa yang masuk duluan di kelas mana pada paruh pertama semester (pra-UTS), dan siapa yang masuk setelah pertukaran (pasca-UTS). **Pengaturan dilakukan oleh dosen pengampu yang bersangkutan** — bukan oleh Admin. Admin dan pengelola jurusan hanya dapat melihat ringkasan konfigurasi.
 
 | Kolom | Tipe | Constraint | Keterangan |
 |-------|------|------------|------------|
@@ -285,6 +287,7 @@ Tabel inti — setiap baris adalah satu penugasan jadwal.
 | `dosen2_id` | UUID | FK → dosen, NULLABLE | Dosen pengampu kedua |
 | `timeslot_id` | UUID | FK → timeslot, NOT NULL | |
 | `ruang_id` | UUID | FK → ruang, NULLABLE | NULL = belum ditentukan |
+| `override_floor_priority` | BOOLEAN | DEFAULT FALSE | TRUE jika penugasan ruang sengaja mengabaikan prioritas lantai (override manual) |
 | `catatan` | TEXT | NULLABLE | |
 | `created_at` | TIMESTAMP | DEFAULT NOW() | |
 | `updated_at` | TIMESTAMP | DEFAULT NOW() | |
@@ -317,7 +320,7 @@ Hasil deteksi konflik per run pemeriksaan.
 | `LECTURER_DOUBLE` | HC-01 | ✅ |
 | `ROOM_DOUBLE` | HC-02 | ✅ (kondisional) |
 | `ROOM_CAPACITY` | HC-03 | ⏸ Defer |
-| `BKD_EXCEEDED` | HC-04 | ⏸ Defer |
+| `BKD_WORKLOAD` | HC-04 | ⏸ Defer |
 | `SINGLE_ASSIGNMENT` | HC-05 | ✅ |
 | `LECTURER_UNAVAILABLE` | HC-06 | ✅ |
 | `PARALLEL_MISMATCH` | HC-07 | ✅ |
@@ -326,6 +329,7 @@ Hasil deteksi konflik per run pemeriksaan.
 | `STUDENT_CONFLICT` | SC-01 | ✅ (WARNING) |
 | `WORKLOAD_INEQUITY` | SC-02 | ✅ (WARNING) |
 | `LECTURER_PREFERENCE_VIOLATED` | SC-03 | ✅ (WARNING) |
+| `FLOOR_PRIORITY_VIOLATED` | SC-05 | ✅ (WARNING, kondisional) |
 | `severity` | VARCHAR(10) | NOT NULL | `ERROR` (HC) / `WARNING` (SC) |
 | `assignment_ids` | UUID[] | NOT NULL | Array assignment yang terlibat |
 | `pesan` | TEXT | NOT NULL | Deskripsi konflik yang dapat dibaca manusia |
@@ -344,21 +348,31 @@ Akun pengguna sistem.
 | `username` | VARCHAR(50) | UNIQUE, NOT NULL | |
 | `email` | VARCHAR(100) | UNIQUE, NULLABLE | |
 | `password_hash` | VARCHAR(200) | NOT NULL | bcrypt hash |
-| `role` | VARCHAR(30) | NOT NULL | `admin` / `sekretaris_jurusan` / `koordinator_prodi` / `kaprodi` / `dosen` |
-| `prodi_id` | UUID | FK → prodi, NULLABLE | Untuk role `kaprodi` |
+| `role` | VARCHAR(30) | NOT NULL | `admin` / `ketua_jurusan` / `sekretaris_jurusan` / `koordinator_prodi` / `dosen` / `tendik_prodi` / `tendik_jurusan` |
+| `prodi_id` | UUID | FK → prodi, NULLABLE | Untuk role `koordinator_prodi` dan `tendik_prodi` |
 | `is_active` | BOOLEAN | DEFAULT TRUE | |
 | `created_at` | TIMESTAMP | DEFAULT NOW() | |
 | `last_login` | TIMESTAMP | NULLABLE | |
 
 **Hak akses per role:**
 
-| Role | Input/Edit Jadwal | Manajemen User | Lihat Semua Prodi | Lihat Prodi Sendiri | Lihat Jadwal Diri |
-|------|:-----------------:|:--------------:|:-----------------:|:-------------------:|:-----------------:|
-| `admin` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `sekretaris_jurusan` | ✅ | ❌ | ✅ | ✅ | ✅ |
-| `koordinator_prodi` | ✅ | ❌ | ✅ | ✅ | ✅ |
-| `kaprodi` | Usulan saja | ❌ | ❌ | ✅ | ✅ |
-| `dosen` | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Role | Edit Jadwal | Approve/Sahkan | Manajemen User | Lihat Semua Prodi | Lihat Prodi Sendiri | Lihat Jadwal Diri | Atur Team Teaching |
+|------|:-----------:|:--------------:|:--------------:|:-----------------:|:-------------------:|:-----------------:|:-----------------:|
+| `admin` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | View only |
+| `ketua_jurusan` | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | View only |
+| `sekretaris_jurusan` | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | View only |
+| `koordinator_prodi` | ✅ (prodi sendiri) | ❌ | ❌ | ❌ | ✅ | ✅ | View only |
+| `tendik_jurusan` | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | View only |
+| `tendik_prodi` | ✅ (prodi sendiri) | ❌ | ❌ | ❌ | ✅ | ✅ | View only |
+| `dosen` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ (own) |
+
+**Konstanta RBAC:**
+```python
+EDITOR_ROLES_JURUSAN = ["admin", "sekretaris_jurusan", "tendik_jurusan"]
+EDITOR_ROLES_PRODI   = ["admin", "sekretaris_jurusan", "tendik_jurusan",
+                         "koordinator_prodi", "tendik_prodi"]
+VIEWER_ROLES         = ["ketua_jurusan"]
+```
 
 ---
 
@@ -378,7 +392,7 @@ class ConflictEngine:
         results += self.check_lecturer_double(assignments)      # HC-01
         results += self.check_room_double(assignments)          # HC-02 (kondisional)
         # HC-03 Room Capacity   → DEFERRED
-        # HC-04 BKD Ceiling     → DEFERRED
+        # HC-04 BKD Workload    → DEFERRED
         results += self.check_lecturer_unavail(assignments)     # HC-06
         results += self.check_parallel_mismatch(assignments)    # HC-07
         results += self.check_student_daily_load(assignments)   # HC-08
@@ -387,6 +401,7 @@ class ConflictEngine:
         results += self.check_student_conflict(assignments)     # SC-01
         results += self.check_workload_equity(assignments)      # SC-02
         results += self.check_lecturer_preference(assignments)  # SC-03
+        results += self.check_floor_priority(assignments)       # SC-05
         return results
 ```
 
@@ -405,12 +420,15 @@ Untuk setiap (sesi_id, timeslot_id, ruang_id != NULL):
   Jika COUNT > 1 → konflik ERROR untuk ruang tersebut
 ```
 
-**HC-04 — BKD Ceiling**
+**HC-04 — BKD Workload (DEFERRED)**
 ```
-Untuk setiap dosen dalam sesi:
-  total_sks = SUM(sks) dari semua assignment dosen tersebut
-  Jika total_sks > dosen.bkd_limit_sks → ERROR
-  Jika total_sks > 12 → WARNING (soft limit)
+→ DEFERRED ke Fase 2. Ketentuan yang direncanakan:
+  Minimum 9 SKS per dosen per semester.
+  Distribusi bertingkat: dosen junior tidak boleh melebihi beban dosen senior
+    dalam satu program studi (berdasarkan masa kerja).
+  Pengecualian dapat diberikan oleh tim pengelola jurusan.
+  Sistem memberikan WARNING jika urutan beban tidak sesuai pola umum.
+  Kolom bkd_limit_sks tersedia di tabel dosen sebagai placeholder.
 ```
 
 **HC-07 — Parallel Class Same Slot**
@@ -459,6 +477,27 @@ Untuk setiap dosen dalam sesi:
     Hitung total_violated = COUNT(is_violated = TRUE) untuk sesi ini
     Simpan ringkasan ke conflict_log.detail sebagai {"total_violated": N}
 ```
+
+**SC-05 — Floor Priority by Lecturer Age**
+```
+Lewati jika ruang_id NULL atau tgl_lahir dosen NULL.
+Lewati jika assignment.override_floor_priority = TRUE.
+
+Untuk setiap timeslot dalam sesi:
+  Ambil semua assignment di timeslot tersebut yang memiliki ruang_id terisi
+  Untuk setiap assignment:
+    Ambil lantai ruang (ruang.lantai)
+    Ambil usia dosen1 dari tgl_lahir (usia = tahun_sekarang - tahun_lahir)
+  Urutkan assignment berdasarkan usia dosen (descending = senior lebih tua)
+  Urutkan ruang berdasarkan lantai (ascending = lantai rendah lebih dulu)
+  Bandingkan urutan: dosen paling senior seharusnya di lantai paling rendah
+  Jika urutan tidak sesuai:
+    → WARNING FLOOR_PRIORITY_VIOLATED
+    → Pesan: "Dosen [nama] (lahir [tgl]) ditempatkan di lantai [N],
+              lebih tinggi dari dosen yang lebih muda [nama2] di lantai [M]"
+    → detail: {"dosen_senior": nama, "lantai_senior": N,
+               "dosen_junior": nama2, "lantai_junior": M}
+```
 ```
 Untuk setiap (prodi, semester, sesi):
   Ambil semua kelas MK yang termasuk semester tersebut
@@ -496,18 +535,18 @@ Untuk setiap (prodi, semester, sesi):
 | DELETE | `/mata-kuliah/{id}` | Hapus MK (soft delete) | Admin |
 | GET | `/mata-kuliah/{id}/kelas` | List kelas paralel MK | All |
 | POST | `/mata-kuliah/{id}/kelas` | Tambah kelas paralel | Admin |
-| GET | `/dosen` | List dosen | Admin, Sekretaris, Koordinator, Kaprodi |
-| POST | `/dosen` | Tambah dosen | Admin, Sekretaris, Koordinator |
-| PUT | `/dosen/{id}` | Update dosen | Admin, Sekretaris, Koordinator |
-| GET | `/dosen/{id}/jadwal` | Jadwal dosen (per sesi) | Admin, Sekretaris, Koordinator, Kaprodi, Dosen (own) |
-| POST | `/dosen/{id}/unavailability` | Input ketidaktersediaan | Admin, Sekretaris, Koordinator, Dosen (own) |
-| GET | `/dosen/{id}/preferences` | List preferensi hari dosen | Admin, Sekretaris, Koordinator, Dosen (own) |
-| POST | `/dosen/{id}/preferences` | Ajukan preferensi hari (pre-schedule / post-draft) | Admin, Sekretaris, Koordinator, Dosen (own) |
-| PUT | `/dosen/{id}/preferences/{pid}` | Update preferensi | Admin, Sekretaris, Koordinator, Dosen (own) |
-| DELETE | `/dosen/{id}/preferences/{pid}` | Hapus preferensi | Admin, Sekretaris, Koordinator, Dosen (own) |
+| GET | `/dosen` | List dosen | Admin, Sekretaris, Koordinator, Tendik Jurusan, Tendik Prodi, Ketua Jurusan |
+| POST | `/dosen` | Tambah dosen | Admin |
+| PUT | `/dosen/{id}` | Update dosen | Admin |
+| GET | `/dosen/{id}/jadwal` | Jadwal dosen (per sesi) | Admin, Sekretaris, Koordinator, Tendik Jurusan, Tendik Prodi, Ketua Jurusan, Dosen (own) |
+| POST | `/dosen/{id}/unavailability` | Input ketidaktersediaan | Admin, Sekretaris, Tendik Jurusan, Dosen (own) |
+| GET | `/dosen/{id}/preferences` | List preferensi hari dosen | Admin, Sekretaris, Tendik Jurusan, Dosen (own) |
+| POST | `/dosen/{id}/preferences` | Ajukan preferensi hari (pre-schedule / post-draft) | Admin, Sekretaris, Tendik Jurusan, Dosen (own) |
+| PUT | `/dosen/{id}/preferences/{pid}` | Update preferensi | Admin, Sekretaris, Tendik Jurusan, Dosen (own) |
+| DELETE | `/dosen/{id}/preferences/{pid}` | Hapus preferensi | Admin, Sekretaris, Tendik Jurusan, Dosen (own) |
 | GET | `/ruang` | List ruang | All |
-| POST | `/ruang` | Tambah ruang | Admin, Sekretaris, Koordinator |
-| PUT | `/ruang/{id}` | Update ruang | Admin, Sekretaris, Koordinator |
+| POST | `/ruang` | Tambah ruang | Admin, Sekretaris, Tendik Jurusan |
+| PUT | `/ruang/{id}` | Update ruang | Admin, Sekretaris, Tendik Jurusan |
 | GET | `/timeslot` | List timeslot | All |
 | POST | `/timeslot` | Tambah timeslot | Admin |
 
@@ -516,36 +555,39 @@ Untuk setiap (prodi, semester, sesi):
 | Method | Path | Deskripsi | Role |
 |--------|------|-----------|------|
 | GET | `/sesi` | List sesi jadwal | All |
-| POST | `/sesi` | Buat sesi baru | Admin, Sekretaris, Koordinator |
-| PUT | `/sesi/{id}` | Update status sesi | Admin, Sekretaris, Koordinator |
+| POST | `/sesi` | Buat sesi baru | Admin, Sekretaris, Tendik Jurusan |
+| PUT | `/sesi/{id}` | Update status sesi | Admin, Sekretaris, Tendik Jurusan |
+| PATCH | `/sesi/{id}/approve` | Setujui / minta revisi jadwal | Ketua Jurusan |
+| PATCH | `/sesi/{id}/publish` | Sahkan jadwal sebagai jadwal resmi | Ketua Jurusan |
 | GET | `/sesi/{id}/assignments` | List semua assignment (filter: prodi, hari) | All* |
-| POST | `/sesi/{id}/assignments` | Tambah assignment | Admin, Sekretaris, Koordinator, Kaprodi |
-| PUT | `/sesi/{id}/assignments/{aid}` | Update assignment | Admin, Sekretaris, Koordinator, Kaprodi |
-| DELETE | `/sesi/{id}/assignments/{aid}` | Hapus assignment | Admin, Sekretaris, Koordinator |
-| GET | `/sesi/{id}/assignments/{aid}/team-teaching` | Lihat pengaturan team teaching | Admin, Sekretaris, Koordinator |
-| PUT | `/sesi/{id}/assignments/{aid}/team-teaching` | Set/update urutan masuk kelas team teaching | Admin, Sekretaris, Koordinator |
-| POST | `/sesi/{id}/assignments/{aid}/team-teaching/swap` | Jadwalkan pertukaran urutan setelah UTS | Admin, Sekretaris, Koordinator |
-| GET | `/sesi/{id}/preferences-summary` | Ringkasan pelanggaran preferensi dosen per sesi | Admin, Sekretaris, Koordinator |
+| POST | `/sesi/{id}/assignments` | Tambah assignment | Admin, Sekretaris, Tendik Jurusan, Koordinator Prodi, Tendik Prodi |
+| PUT | `/sesi/{id}/assignments/{aid}` | Update assignment | Admin, Sekretaris, Tendik Jurusan, Koordinator Prodi, Tendik Prodi |
+| PATCH | `/sesi/{id}/assignments/{aid}/override-floor` | Toggle override prioritas lantai | Admin, Sekretaris, Tendik Jurusan |
+| DELETE | `/sesi/{id}/assignments/{aid}` | Hapus assignment | Admin, Sekretaris, Tendik Jurusan |
+| GET | `/sesi/{id}/assignments/{aid}/team-teaching` | Lihat pengaturan team teaching | All |
+| PUT | `/sesi/{id}/assignments/{aid}/team-teaching` | Set/update urutan masuk kelas team teaching | Dosen (own) |
+| POST | `/sesi/{id}/assignments/{aid}/team-teaching/swap` | Jadwalkan pertukaran urutan setelah UTS | Dosen (own) |
+| GET | `/sesi/{id}/preferences-summary` | Ringkasan pelanggaran preferensi dosen per sesi | Admin, Sekretaris, Tendik Jurusan, Ketua Jurusan |
 
-> *Kaprodi hanya melihat assignment prodi-nya; Dosen hanya melihat assignment dirinya.
+> *Koordinator Prodi dan Tendik Prodi hanya melihat assignment prodi-nya; Dosen hanya melihat assignment dirinya; Ketua Jurusan melihat semua.
 
 ### 4.4 Konflik dan Laporan
 
 | Method | Path | Deskripsi | Role |
 |--------|------|-----------|------|
-| POST | `/sesi/{id}/check-conflicts` | Jalankan conflict detection | Admin, Sekretaris, Koordinator |
-| GET | `/sesi/{id}/conflicts` | List konflik (filter: jenis, severity) | Admin, Sekretaris, Koordinator, Kaprodi |
-| PATCH | `/sesi/{id}/conflicts/{cid}/resolve` | Tandai konflik sebagai resolved | Admin, Sekretaris, Koordinator |
-| GET | `/sesi/{id}/reports/sks-rekap` | Rekap beban SKS per dosen | Admin, Sekretaris, Koordinator, Kaprodi |
-| GET | `/sesi/{id}/reports/room-map` | Peta penggunaan ruang | Admin, Sekretaris, Koordinator |
+| POST | `/sesi/{id}/check-conflicts` | Jalankan conflict detection | Admin, Sekretaris, Tendik Jurusan, Koordinator Prodi, Tendik Prodi |
+| GET | `/sesi/{id}/conflicts` | List konflik (filter: jenis, severity) | Admin, Sekretaris, Tendik Jurusan, Koordinator Prodi, Tendik Prodi, Ketua Jurusan |
+| PATCH | `/sesi/{id}/conflicts/{cid}/resolve` | Tandai konflik sebagai resolved | Admin, Sekretaris, Tendik Jurusan |
+| GET | `/sesi/{id}/reports/sks-rekap` | Rekap beban SKS per dosen | Admin, Sekretaris, Tendik Jurusan, Koordinator Prodi, Ketua Jurusan |
+| GET | `/sesi/{id}/reports/room-map` | Peta penggunaan ruang | Admin, Sekretaris, Tendik Jurusan, Ketua Jurusan |
 
 ### 4.5 Import / Export
 
 | Method | Path | Deskripsi | Role |
 |--------|------|-----------|------|
-| POST | `/import/master` | Import data master dari Excel | Admin, Sekretaris, Koordinator |
-| POST | `/import/jadwal` | Import jadwal dari Excel | Admin, Sekretaris, Koordinator |
-| GET | `/sesi/{id}/export` | Export jadwal ke Excel | Admin, Sekretaris, Koordinator, Kaprodi |
+| POST | `/import/master` | Import data master dari Excel | Admin |
+| POST | `/import/jadwal` | Import jadwal dari Excel | Admin, Sekretaris, Tendik Jurusan |
+| GET | `/sesi/{id}/export` | Export jadwal ke Excel | Admin, Sekretaris, Tendik Jurusan, Koordinator Prodi, Tendik Prodi, Ketua Jurusan |
 
 ---
 
@@ -582,22 +624,32 @@ Login
 
 ### 5.2 Halaman Utama per Role
 
-**Admin Jurusan** — akses penuh ke semua halaman termasuk manajemen user.
+**Admin Sistem** — akses penuh ke semua halaman termasuk manajemen user dan konfigurasi sistem.
 
-**Sekretaris Jurusan** — akses penuh ke semua halaman kecuali manajemen user dan konfigurasi sistem.
+**Ketua Jurusan** — melihat:
+- Dashboard (ringkasan sesi aktif, konflik terbuka, beban SKS)
+- Tabel Assignment (read-only, semua prodi)
+- Deteksi Konflik (read-only, semua prodi)
+- Rekap SKS per Dosen
+- Tombol Approve / Sahkan jadwal
 
-**Koordinator Prodi** — akses penuh ke semua halaman kecuali manajemen user dan konfigurasi sistem.
+**Sekretaris Jurusan** — akses penuh ke semua halaman kecuali manajemen user, konfigurasi sistem, dan tombol approve/sahkan.
 
-**Kaprodi** — melihat:
+**Koordinator Prodi** — melihat:
 - Dashboard (terbatas: hanya data prodi sendiri)
-- Tabel Assignment (filter prodi sendiri)
+- Tabel Assignment (edit, filter prodi sendiri)
 - Deteksi Konflik (hanya konflik yang melibatkan prodi sendiri)
 - Rekap SKS (hanya dosen homebase prodi sendiri)
+
+**Tendik Jurusan** — akses setara Sekretaris Jurusan kecuali tanpa kewenangan akademik (tidak dapat menetapkan dosen pengampu).
+
+**Tendik Prodi** — akses setara Koordinator Prodi kecuali tanpa kewenangan akademik.
 
 **Dosen** — melihat:
 - Jadwal Pribadi (kalender/tabel mingguan)
 - Profil & Input Unavailability
 - Form Preferensi Hari Mengajar (pre-schedule dan post-draft)
+- Pengaturan Team Teaching (hanya untuk MK yang ia ampu sebagai team teaching)
 
 ### 5.3 Tampilan Tabel Assignment
 

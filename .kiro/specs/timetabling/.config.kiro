@@ -1,0 +1,7 @@
+{
+  "specType": "feature",
+  "workflowType": "requirements-first",
+  "featureName": "timetabling",
+  "version": "1.2.0",
+  "createdAt": "2026-04-23"
+}
