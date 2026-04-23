@@ -31,13 +31,13 @@
 
 ### 0.1 Struktur Proyek & Tooling
 
-- [ ] **T0.1.1** — Inisialisasi struktur direktori sesuai `design.md §6` (`backend/`, `frontend/`, `nginx/`)
-- [ ] **T0.1.2** — Inisialisasi Git repository dan buat `.gitignore` untuk Python, Node, Docker
-- [ ] **T0.1.3** — Buat `docker-compose.yml` dengan service: `db` (PostgreSQL 15), `api` (FastAPI), `frontend` (React/Nginx), `proxy` (Nginx)
-- [ ] **T0.1.4** — Buat `backend/requirements.txt` dengan dependensi: `fastapi`, `uvicorn`, `sqlalchemy`, `alembic`, `psycopg2-binary`, `pydantic`, `python-jose`, `passlib[bcrypt]`, `openpyxl`, `pandas`, `pytest`, `httpx`
-- [ ] **T0.1.5** — Inisialisasi project React + TypeScript dengan Vite; install `tailwindcss`, `shadcn/ui`, `axios`, `zustand`, `react-router-dom`, `@tanstack/react-query`
-- [ ] **T0.1.6** — Konfigurasi environment variables: buat `.env.example` untuk `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`
-- [ ] **T0.1.7** — Verifikasi: jalankan `docker compose up` dan pastikan semua service healthy
+- [x] **T0.1.1** — Inisialisasi struktur direktori sesuai `design.md §6` (`backend/`, `frontend/`, `nginx/`)
+- [x] **T0.1.2** — Inisialisasi Git repository dan buat `.gitignore` untuk Python, Node, Docker
+- [x] **T0.1.3** — Buat `docker-compose.yml` dengan service: `db` (PostgreSQL 15), `api` (FastAPI), `frontend` (React/Nginx), `proxy` (Nginx)
+- [x] **T0.1.4** — Buat `backend/requirements.txt` dengan dependensi: `fastapi`, `uvicorn`, `sqlalchemy`, `alembic`, `psycopg2-binary`, `pydantic`, `python-jose`, `passlib[bcrypt]`, `openpyxl`, `pandas`, `pytest`, `httpx`
+- [x] **T0.1.5** — Inisialisasi project React + TypeScript dengan Vite; install `tailwindcss`, `shadcn/ui`, `axios`, `zustand`, `react-router-dom`, `@tanstack/react-query`
+- [x] **T0.1.6** — Konfigurasi environment variables: buat `.env.example` untuk `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`
+- [x] **T0.1.7** — Verifikasi: jalankan `docker compose up` dan pastikan semua service healthy
 
 ---
 
@@ -47,35 +47,35 @@
 
 ### 1.1 Setup Database
 
-- [ ] **T1.1.1** — Setup SQLAlchemy engine dan session factory di `backend/app/database.py`
-- [ ] **T1.1.2** — Inisialisasi Alembic (`alembic init`); konfigurasi `alembic/env.py` agar membaca `DATABASE_URL` dari environment
-- [ ] **T1.1.3** — Buat base model SQLAlchemy dengan kolom `id` (UUID), `created_at`, `updated_at` sebagai mixin
+- [x] **T1.1.1** — Setup SQLAlchemy engine dan session factory di `backend/app/database.py`
+- [x] **T1.1.2** — Inisialisasi Alembic (`alembic init`); konfigurasi `alembic/env.py` agar membaca `DATABASE_URL` dari environment
+- [x] **T1.1.3** — Buat base model SQLAlchemy dengan kolom `id` (UUID), `created_at`, `updated_at` sebagai mixin
 
 ### 1.2 ORM Models
 
 Buat satu file per model sesuai `design.md §2.2`. Setiap task mencakup model + index + relasi.
 
-- [ ] **T1.2.1** — Model `User` (`backend/app/models/user.py`) — enum role: `admin`, `ketua_jurusan`, `sekretaris_jurusan`, `koordinator_prodi`, `dosen`, `tendik_prodi`, `tendik_jurusan`; kolom `prodi_id` NULLABLE (untuk `koordinator_prodi` dan `tendik_prodi`)
-- [ ] **T1.2.2** — Model `Prodi` (`backend/app/models/prodi.py`)
-- [ ] **T1.2.3** — Model `Kurikulum` dengan relasi FK ke `Prodi`
-- [ ] **T1.2.4** — Model `MataKuliah` dengan relasi FK ke `Kurikulum`
-- [ ] **T1.2.5** — Model `MataKuliahKelas` dengan relasi FK ke `MataKuliah`
-- [ ] **T1.2.6** — Model `Ruang`
-- [ ] **T1.2.7** — Model `Timeslot`
-- [ ] **T1.2.8** — Model `Dosen` dengan relasi FK ke `Prodi` (homebase) dan `User`; kolom `bkd_limit_sks` (SMALLINT, NULLABLE) sebagai placeholder untuk fase berikutnya — tidak divalidasi di Fase 1
-- [ ] **T1.2.9** — Model `DosenUnavailability` dengan relasi FK ke `Dosen` dan `Timeslot`
-- [ ] **T1.2.9b** — Model `DosenPreference` dengan kolom `fase` (`pre_schedule`/`post_draft`), `is_violated`, relasi FK ke `Dosen`, `Timeslot`, `SesiJadwal`
-- [ ] **T1.2.9c** — Model `TeamTeachingOrder` dengan kolom `urutan_pra_uts`, `urutan_pasca_uts`, relasi FK ke `JadwalAssignment` dan `Dosen`
-- [ ] **T1.2.10** — Model `SesiJadwal`
-- [ ] **T1.2.11** — Model `JadwalAssignment` dengan relasi FK ke `SesiJadwal`, `MataKuliahKelas`, `Dosen` (x2), `Timeslot`, `Ruang`; tambahkan field `override_floor_priority` (BOOLEAN, DEFAULT FALSE); tambahkan index untuk conflict detection query
-- [ ] **T1.2.12** — Model `ConflictLog` dengan kolom `assignment_ids` (PostgreSQL Array) dan `detail` (JSONB)
+- [x] **T1.2.1** — Model `User` (`backend/app/models/user.py`) — enum role: `admin`, `ketua_jurusan`, `sekretaris_jurusan`, `koordinator_prodi`, `dosen`, `tendik_prodi`, `tendik_jurusan`; kolom `prodi_id` NULLABLE (untuk `koordinator_prodi` dan `tendik_prodi`)
+- [x] **T1.2.2** — Model `Prodi` (`backend/app/models/prodi.py`)
+- [x] **T1.2.3** — Model `Kurikulum` dengan relasi FK ke `Prodi`
+- [x] **T1.2.4** — Model `MataKuliah` dengan relasi FK ke `Kurikulum`
+- [x] **T1.2.5** — Model `MataKuliahKelas` dengan relasi FK ke `MataKuliah`
+- [x] **T1.2.6** — Model `Ruang`
+- [x] **T1.2.7** — Model `Timeslot`
+- [x] **T1.2.8** — Model `Dosen` dengan relasi FK ke `Prodi` (homebase) dan `User`; kolom `bkd_limit_sks` (SMALLINT, NULLABLE) sebagai placeholder untuk fase berikutnya — tidak divalidasi di Fase 1
+- [x] **T1.2.9** — Model `DosenUnavailability` dengan relasi FK ke `Dosen` dan `Timeslot`
+- [x] **T1.2.9b** — Model `DosenPreference` dengan kolom `fase` (`pre_schedule`/`post_draft`), `is_violated`, relasi FK ke `Dosen`, `Timeslot`, `SesiJadwal`
+- [x] **T1.2.9c** — Model `TeamTeachingOrder` dengan kolom `urutan_pra_uts`, `urutan_pasca_uts`, relasi FK ke `JadwalAssignment` dan `Dosen`
+- [x] **T1.2.10** — Model `SesiJadwal`
+- [x] **T1.2.11** — Model `JadwalAssignment` dengan relasi FK ke `SesiJadwal`, `MataKuliahKelas`, `Dosen` (x2), `Timeslot`, `Ruang`; tambahkan field `override_floor_priority` (BOOLEAN, DEFAULT FALSE); tambahkan index untuk conflict detection query
+- [x] **T1.2.12** — Model `ConflictLog` dengan kolom `assignment_ids` (PostgreSQL Array) dan `detail` (JSONB)
 
 ### 1.3 Migrasi Database
 
-- [ ] **T1.3.1** — Generate migrasi Alembic awal: `alembic revision --autogenerate -m "initial_schema"` (mencakup semua model termasuk `dosen_preference` dan `team_teaching_order`)
-- [ ] **T1.3.2** — Jalankan migrasi: `alembic upgrade head`
-- [ ] **T1.3.3** — Verifikasi skema di PostgreSQL menggunakan `psql` atau GUI (DBeaver/pgAdmin)
-- [ ] **T1.3.4** — Buat script seed data dasar: **15 timeslot tetap** (3 sesi × 5 hari: Senin–Jumat, sesi 07:30–10:00 / 10:00–12:30 / 13:00–15:30, masing-masing 3 SKS; kode: `mon_s1`…`fri_s3`), user admin default
+- [x] **T1.3.1** — Generate migrasi Alembic awal: `alembic revision --autogenerate -m "initial_schema"` (mencakup semua model termasuk `dosen_preference` dan `team_teaching_order`)
+- [x] **T1.3.2** — Jalankan migrasi: `alembic upgrade head`
+- [x] **T1.3.3** — Verifikasi skema di PostgreSQL menggunakan `psql` atau GUI (DBeaver/pgAdmin)
+- [x] **T1.3.4** — Buat script seed data dasar: **15 timeslot tetap** (3 sesi × 5 hari: Senin–Jumat, sesi 07:30–10:00 / 10:00–12:30 / 13:00–15:30, masing-masing 3 SKS; kode: `mon_s1`…`fri_s3`), user admin default
 
 ---
 
@@ -85,30 +85,30 @@ Buat satu file per model sesuai `design.md §2.2`. Setiap task mencakup model + 
 
 ### 2.1 Autentikasi
 
-- [ ] **T2.1.1** — Implementasi JWT utility di `backend/app/core/auth.py`: `create_token`, `verify_token`, `get_current_user`
-- [ ] **T2.1.2** — Implementasi password hashing dengan bcrypt di `core/security.py`
-- [ ] **T2.1.3** — Implementasi RBAC helper di `core/permissions.py`: decorator/dependency `require_role(roles: list)`; definisikan konstanta:
+- [x] **T2.1.1** — Implementasi JWT utility di `backend/app/core/auth.py`: `create_token`, `verify_token`, `get_current_user`
+- [x] **T2.1.2** — Implementasi password hashing dengan bcrypt di `core/security.py`
+- [x] **T2.1.3** — Implementasi RBAC helper di `core/permissions.py`: decorator/dependency `require_role(roles: list)`; definisikan konstanta:
   - `EDITOR_ROLES_JURUSAN = [admin, sekretaris_jurusan, tendik_jurusan]`
   - `EDITOR_ROLES_PRODI = [admin, sekretaris_jurusan, tendik_jurusan, koordinator_prodi, tendik_prodi]`
   - `VIEWER_ROLES = [ketua_jurusan]`
-- [ ] **T2.1.4** — Router `POST /auth/login` — verifikasi credentials, kembalikan JWT
-- [ ] **T2.1.5** — Router `GET /auth/me` — kembalikan profil user aktif
-- [ ] **T2.1.6** — Test: login sukses, login gagal, token expired, akses tanpa token
+- [x] **T2.1.4** — Router `POST /auth/login` — verifikasi credentials, kembalikan JWT
+- [x] **T2.1.5** — Router `GET /auth/me` — kembalikan profil user aktif
+- [x] **T2.1.6** — Test: login sukses, login gagal, token expired, akses tanpa token
 
 ### 2.2 CRUD Data Master
 
 Setiap task di bawah mencakup: Pydantic schema (request/response), router handler, service layer, dan unit test.
 
-- [ ] **T2.2.1** — CRUD `Prodi`: `GET /prodi`, `POST /prodi`, `PUT /prodi/{id}`
-- [ ] **T2.2.2** — CRUD `Kurikulum`: `GET /kurikulum`, `POST /kurikulum`, `PUT /kurikulum/{id}`
-- [ ] **T2.2.3** — CRUD `MataKuliah`: `GET /mata-kuliah` (dengan filter prodi/kurikulum/semester), `POST`, `PUT`, `DELETE`
-- [ ] **T2.2.4** — CRUD `MataKuliahKelas`: `GET /mata-kuliah/{id}/kelas`, `POST`, `PUT`, `DELETE`
-- [ ] **T2.2.5** — CRUD `Ruang`: `GET /ruang`, `POST`, `PUT`
-- [ ] **T2.2.6** — CRUD `Timeslot`: `GET /timeslot`, `POST`, `PUT`
-- [ ] **T2.2.7** — CRUD `Dosen`: `GET /dosen`, `POST`, `PUT` (termasuk filter homebase, status)
-- [ ] **T2.2.8** — Endpoint `POST /dosen/{id}/unavailability` dan `GET /dosen/{id}/unavailability`
-- [ ] **T2.2.8b** — Endpoint preferensi dosen: `GET /dosen/{id}/preferences`, `POST /dosen/{id}/preferences` (dengan field `fase`: `pre_schedule`/`post_draft`), `PUT /dosen/{id}/preferences/{pid}`, `DELETE /dosen/{id}/preferences/{pid}`; validasi bahwa dosen hanya dapat mengelola preferensi dirinya sendiri
-- [ ] **T2.2.9** — CRUD `User` (admin only): `GET /users`, `POST /users`, `PUT /users/{id}`, `PATCH /users/{id}/reset-password`
+- [x] **T2.2.1** — CRUD `Prodi`: `GET /prodi`, `POST /prodi`, `PUT /prodi/{id}`
+- [x] **T2.2.2** — CRUD `Kurikulum`: `GET /kurikulum`, `POST /kurikulum`, `PUT /kurikulum/{id}`
+- [x] **T2.2.3** — CRUD `MataKuliah`: `GET /mata-kuliah` (dengan filter prodi/kurikulum/semester), `POST`, `PUT`, `DELETE`
+- [x] **T2.2.4** — CRUD `MataKuliahKelas`: `GET /mata-kuliah/{id}/kelas`, `POST`, `PUT`, `DELETE`
+- [-] **T2.2.5** — CRUD `Ruang`: `GET /ruang`, `POST`, `PUT`
+- [~] **T2.2.6** — CRUD `Timeslot`: `GET /timeslot`, `POST`, `PUT`
+- [~] **T2.2.7** — CRUD `Dosen`: `GET /dosen`, `POST`, `PUT` (termasuk filter homebase, status)
+- [~] **T2.2.8** — Endpoint `POST /dosen/{id}/unavailability` dan `GET /dosen/{id}/unavailability`
+- [~] **T2.2.8b** — Endpoint preferensi dosen: `GET /dosen/{id}/preferences`, `POST /dosen/{id}/preferences` (dengan field `fase`: `pre_schedule`/`post_draft`), `PUT /dosen/{id}/preferences/{pid}`, `DELETE /dosen/{id}/preferences/{pid}`; validasi bahwa dosen hanya dapat mengelola preferensi dirinya sendiri
+- [~] **T2.2.9** — CRUD `User` (admin only): `GET /users`, `POST /users`, `PUT /users/{id}`, `PATCH /users/{id}/reset-password`
 
 ---
 
