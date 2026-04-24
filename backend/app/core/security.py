@@ -1,11 +1,13 @@
 """
 backend/app/core/security.py
-Password hashing utilities using bcrypt via passlib.
+Password hashing utilities using bcrypt directly.
+
+NOTE: passlib[bcrypt]==1.7.4 is incompatible with bcrypt>=4.0.0 (AttributeError on
+__about__ and changed hashpw API). We use the bcrypt library directly — consistent
+with scripts/seed.py — to avoid this version mismatch.
 """
 
-from passlib.context import CryptContext
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import bcrypt
 
 
 def hash_password(plain_password: str) -> str:
@@ -17,7 +19,7 @@ def hash_password(plain_password: str) -> str:
     Returns:
         A bcrypt hash string suitable for storing in the database.
     """
-    return _pwd_context.hash(plain_password)
+    return bcrypt.hashpw(plain_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -30,4 +32,4 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if the password matches, False otherwise.
     """
-    return _pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))

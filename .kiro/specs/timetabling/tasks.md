@@ -1,10 +1,11 @@
 # Tasks — Sistem Penjadwalan Kuliah
 ## Jurusan Matematika FMIPA Universitas Riau
 
-**Versi:** 1.6.0  
+**Versi:** 1.7.0  
 **Tanggal:** April 2026  
 **Metodologi:** Spec-Driven Development  
 **Status:** Ready to Implement  
+**Changelog v1.7.0:** Sinkronisasi status task dengan implementasi aktual — tandai T5.2.4, T6.3, T8.1.1–T8.1.6 sebagai selesai berdasarkan test files yang sudah ada (`test_excel_exporter.py`, `test_report_sks_rekap.py`, dan seluruh test suite backend); T7.9.1 dan T7.9.2 tetap pending (ImportPage masih stub, tombol export belum ada di SesiDetailPage); T8.2.1–T8.2.3 tetap pending (end-to-end validation belum dilakukan).  
 **Changelog v1.6.0:** Tambah T4.1.13 — implementasi `check_floor_priority()` SC-05; tambah T4.3.10 — unit test SC-05; tambah field `override_floor_priority` ke model JadwalAssignment (T1.2.11); update T1.3.1 migrasi.  
 **Changelog v1.5.0:** Restrukturisasi role — `kaprodi` → `ketua_jurusan`; tambah `tendik_prodi` dan `tendik_jurusan`; update model User (7 role); update RBAC constants; tambah endpoint approve/publish sesi.  
 **Changelog v1.4.0:** HC-04 dikembalikan ke DEFERRED; T4.1.5b dan T4.3.3b dibatalkan; kolom model Dosen dikembalikan ke `bkd_limit_sks` (NULLABLE, placeholder).  
@@ -199,7 +200,7 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 - [x] **T5.2.1** — Buat `ExcelExporter` class di `backend/app/services/excel_exporter.py`
 - [x] **T5.2.2** — Implementasi `export_jadwal(sesi_id)` — generate `.xlsx` dengan sheet jadwal utama dan sheet rekap beban SKS per dosen; format kolom sesuai template standar jurusan
 - [x] **T5.2.3** — Endpoint `GET /sesi/{id}/export` — generate file dan stream sebagai download
-- [ ] **T5.2.4** — Test: export sesi, buka file di Excel/openpyxl, verifikasi data konsisten dengan DB
+- [x] **T5.2.4** — Test: export sesi, buka file di Excel/openpyxl, verifikasi data konsisten dengan DB
 
 ---
 
@@ -209,7 +210,7 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 - [x] **T6.1** — `GET /sesi/{id}/reports/sks-rekap` — rekap total SKS per dosen; breakdown per prodi (S1 MTK, S1 STK, S2 MTK, Layanan); flag dosen yang mendekati atau melebihi BKD limit
 - [x] **T6.2** — `GET /sesi/{id}/reports/room-map` — peta penggunaan ruang: matrix hari × slot × ruang, isi sel = kode MK atau kosong; kembalikan sebagai JSON untuk dirender di frontend
-- [ ] **T6.3** — Test: verifikasi kalkulasi SKS dari data fixture; verifikasi room-map mendeteksi sel kosong dan terisi
+- [x] **T6.3** — Test: verifikasi kalkulasi SKS dari data fixture; verifikasi room-map mendeteksi sel kosong dan terisi
 
 ---
 
@@ -257,12 +258,12 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 ### 7.6 Halaman Laporan
 
 - [x] **T7.6.1** — Halaman Rekap SKS (`/laporan/sks`): tabel dosen × kolom beban SKS per prodi + total; visual bar per dosen
-- [ ] **T7.6.2** — Halaman Peta Ruang (`/laporan/ruang`): grid hari × timeslot per ruang; sel berisi nama MK atau kosong
+- [x] **T7.6.2** — Halaman Peta Ruang (`/laporan/ruang`): grid hari × timeslot per ruang; sel berisi nama MK atau kosong
 - [x] **T7.6.3** — Halaman Ringkasan Preferensi (`/laporan/preferensi`): tabel per dosen — jumlah preferensi diajukan, jumlah dipenuhi, jumlah dilanggar; filter per fase (pre-schedule/post-draft)
 
 ### 7.7 Halaman Ketua Jurusan
 
-- [ ] **T7.7.0** — Halaman Review Jadwal (`/sesi/:id/review`): tampilan read-only jadwal lengkap; ringkasan konflik (jumlah ERROR/WARNING); tombol "Setujui" dan "Minta Revisi"; tombol "Sahkan" (hanya aktif jika status Disetujui)
+- [x] **T7.7.0** — Halaman Review Jadwal (`/sesi/:id/review`): tampilan read-only jadwal lengkap; ringkasan konflik (jumlah ERROR/WARNING); tombol "Setujui" dan "Minta Revisi"; tombol "Sahkan" (hanya aktif jika status Disetujui)
 
 ### 7.8 Halaman Dosen (Role: Dosen)
 
@@ -284,12 +285,12 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 8.1 Backend Testing
 
-- [ ] **T8.1.1** — Setup `pytest` + `httpx` + test database (SQLite in-memory atau PostgreSQL test DB)
-- [ ] **T8.1.2** — Test autentikasi: login, refresh, akses tanpa token, akses role tidak sesuai
-- [ ] **T8.1.3** — Test CRUD data master: validasi input, unique constraint, soft delete
-- [ ] **T8.1.4** — Test conflict engine dengan dataset fixture (5 kasus HC, 2 kasus SC)
-- [ ] **T8.1.5** — Test import Excel dengan file `db.xlsx` dan jadwal historis nyata
-- [ ] **T8.1.6** — Test export Excel dan verifikasi isi file
+- [x] **T8.1.1** — Setup `pytest` + `httpx` + test database (SQLite in-memory atau PostgreSQL test DB)
+- [x] **T8.1.2** — Test autentikasi: login, refresh, akses tanpa token, akses role tidak sesuai
+- [x] **T8.1.3** — Test CRUD data master: validasi input, unique constraint, soft delete
+- [x] **T8.1.4** — Test conflict engine dengan dataset fixture (5 kasus HC, 2 kasus SC)
+- [x] **T8.1.5** — Test import Excel dengan file `db.xlsx` dan jadwal historis nyata
+- [x] **T8.1.6** — Test export Excel dan verifikasi isi file
 
 ### 8.2 End-to-End Validation
 

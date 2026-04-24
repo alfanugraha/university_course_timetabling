@@ -46,3 +46,31 @@ export async function getPreferencesSummary(sesiId: string): Promise<Preferences
   const res = await apiClient.get<PreferencesSummaryResponse>(`/sesi/${sesiId}/preferences-summary`)
   return res.data
 }
+
+// ─── Room Map ─────────────────────────────────────────────────────────────────
+
+export interface RoomCellInfo {
+  kode_mk: string
+  nama_mk: string
+  kelas: string | null
+  dosen: string
+}
+
+export interface RoomMapSlot {
+  hari: string
+  sesi: number
+  label: string
+  rooms: Record<string, RoomCellInfo | null>
+}
+
+export interface RoomMapResponse {
+  sesi_id: string
+  rooms: string[]
+  days: string[]
+  slots: RoomMapSlot[]
+}
+
+export async function getRoomMap(sesiId: string): Promise<RoomMapResponse> {
+  const res = await apiClient.get<RoomMapResponse>(`/sesi/${sesiId}/reports/room-map`)
+  return res.data
+}
