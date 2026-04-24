@@ -274,8 +274,8 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 7.9 Halaman Import/Export (Admin)
 
-- [ ] **T7.9.1** — Halaman Import (`/import`): upload file Excel untuk data master dan jadwal; tampilkan hasil (berhasil/gagal/dilewati)
-- [ ] **T7.9.2** — Tombol Export di halaman Detail Sesi: panggil `GET /sesi/{id}/export`, trigger download file
+- [x] **T7.9.1** — Halaman Import (`/import`): upload file Excel untuk data master dan jadwal; tampilkan hasil (berhasil/gagal/dilewati)
+- [x] **T7.9.2** — Tombol Export di halaman Detail Sesi: panggil `GET /sesi/{id}/export`, trigger download file
 
 ---
 
@@ -294,9 +294,9 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 8.2 End-to-End Validation
 
-- [ ] **T8.2.1** — Jalankan full workflow: import `db.xlsx` → import jadwal historis (Genap 2025-2026) → periksa konflik → verifikasi konflik yang dideteksi sesuai yang diketahui manual
-- [ ] **T8.2.2** — Validasi seluruh 10 acceptance criteria dari `requirements.md §5`
-- [ ] **T8.2.3** — Test role isolation: login sebagai `sekretaris_jurusan` → dapat edit jadwal semua prodi, tidak dapat akses manajemen user; login sebagai `tendik_jurusan` → dapat edit jadwal semua prodi; login sebagai `koordinator_prodi` → hanya dapat edit jadwal prodi sendiri; login sebagai `tendik_prodi` → hanya dapat edit jadwal prodi sendiri; login sebagai `ketua_jurusan` → hanya read + approve/publish; login sebagai `dosen` → hanya data diri sendiri, dapat mengajukan preferensi dan mengatur team teaching untuk MK yang ia ampu; verifikasi dosen tidak dapat mengatur team teaching untuk MK yang bukan miliknya
+- [x] **T8.2.1** — Jalankan full workflow: import `db.xlsx` → import jadwal historis (Genap 2025-2026) → periksa konflik → verifikasi konflik yang dideteksi sesuai yang diketahui manual
+- [-] **T8.2.2** — Validasi seluruh 10 acceptance criteria dari `requirements.md §5`
+- [-] **T8.2.3** — Test role isolation: login sebagai `sekretaris_jurusan` → dapat edit jadwal semua prodi, tidak dapat akses manajemen user; login sebagai `tendik_jurusan` → dapat edit jadwal semua prodi; login sebagai `koordinator_prodi` → hanya dapat edit jadwal prodi sendiri; login sebagai `tendik_prodi` → hanya dapat edit jadwal prodi sendiri; login sebagai `ketua_jurusan` → hanya read + approve/publish; login sebagai `dosen` → hanya data diri sendiri, dapat mengajukan preferensi dan mengatur team teaching untuk MK yang ia ampu; verifikasi dosen tidak dapat mengatur team teaching untuk MK yang bukan miliknya
 
 ---
 

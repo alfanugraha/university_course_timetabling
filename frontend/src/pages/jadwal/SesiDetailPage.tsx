@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Filter, X, Plus, Pencil, Users, AlertCircle, AlertTriangle, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Filter, X, Plus, Pencil, Users, AlertCircle, AlertTriangle, ShieldAlert, Download } from 'lucide-react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 import { DataTable, ColumnDef } from '@/components/DataTable'
@@ -14,6 +14,7 @@ import { getSesiList, SesiJadwal } from '@/api/sesi'
 import { getAssignments, Assignment, AssignmentListParams } from '@/api/assignment'
 import { getProdi, Prodi } from '@/api/prodi'
 import { getConflicts, ConflictLog } from '@/api/conflict'
+import { exportJadwal } from '@/api/importExport'
 
 // ─── RBAC ─────────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,15 @@ const EDITOR_ROLES_PRODI = [
   'tendik_jurusan',
   'koordinator_prodi',
   'tendik_prodi',
+]
+
+const EXPORT_ROLES = [
+  'admin',
+  'sekretaris_jurusan',
+  'tendik_jurusan',
+  'koordinator_prodi',
+  'tendik_prodi',
+  'ketua_jurusan',
 ]
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -430,8 +440,10 @@ export default function SesiDetailPage() {
   const [page, setPage] = useState(1)
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   const canEdit = !!user && EDITOR_ROLES_PRODI.includes(user.role)
+  const canExport = !!user && EXPORT_ROLES.includes(user.role)
 
   // ── Queries ───────────────────────────────────────────────────────────────
 
@@ -482,6 +494,16 @@ export default function SesiDetailPage() {
     setFilters(EMPTY_FILTER)
     setPage(1)
   }, [])
+
+  const handleExport = useCallback(async () => {
+    if (!sesiId) return
+    setIsExporting(true)
+    try {
+      await exportJadwal(sesiId, sesi?.nama)
+    } finally {
+      setIsExporting(false)
+    }
+  }, [sesiId, sesi?.nama])
 
   // ── Derived ───────────────────────────────────────────────────────────────
 
@@ -557,6 +579,16 @@ export default function SesiDetailPage() {
             <Users size={14} />
             Team Teaching
           </Link>
+          {canExport && (
+            <button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download size={14} />
+              {isExporting ? 'Mengunduh...' : 'Export'}
+            </button>
+          )}
           {canEdit && (
             <button
               onClick={() => setShowAddModal(true)}
