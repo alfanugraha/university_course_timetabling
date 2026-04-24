@@ -208,8 +208,8 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 **Tujuan:** Membangun endpoint reporting yang dibutuhkan Admin dan Kaprodi.
 
 - [x] **T6.1** — `GET /sesi/{id}/reports/sks-rekap` — rekap total SKS per dosen; breakdown per prodi (S1 MTK, S1 STK, S2 MTK, Layanan); flag dosen yang mendekati atau melebihi BKD limit
-- [-] **T6.2** — `GET /sesi/{id}/reports/room-map` — peta penggunaan ruang: matrix hari × slot × ruang, isi sel = kode MK atau kosong; kembalikan sebagai JSON untuk dirender di frontend
-- [~] **T6.3** — Test: verifikasi kalkulasi SKS dari data fixture; verifikasi room-map mendeteksi sel kosong dan terisi
+- [x] **T6.2** — `GET /sesi/{id}/reports/room-map` — peta penggunaan ruang: matrix hari × slot × ruang, isi sel = kode MK atau kosong; kembalikan sebagai JSON untuk dirender di frontend
+- [ ] **T6.3** — Test: verifikasi kalkulasi SKS dari data fixture; verifikasi room-map mendeteksi sel kosong dan terisi
 
 ---
 
@@ -250,15 +250,15 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 7.5 Halaman Deteksi Konflik
 
-- [~] **T7.5.1** — Halaman Konflik (`/sesi/:id/konflik`): tombol "Periksa Konflik", ringkasan (n ERROR, n WARNING), tabel konflik dengan kolom: jenis, severity, pesan, terlibat, status resolved
-- [~] **T7.5.2** — Aksi "Tandai Resolved" per baris konflik (akses: `EDITOR_ROLES_JURUSAN`)
-- [~] **T7.5.3** — Filter konflik berdasarkan jenis dan severity
+- [x] **T7.5.1** — Halaman Konflik (`/sesi/:id/konflik`): tombol "Periksa Konflik", ringkasan (n ERROR, n WARNING), tabel konflik dengan kolom: jenis, severity, pesan, terlibat, status resolved
+- [x] **T7.5.2** — Aksi "Tandai Resolved" per baris konflik (akses: `EDITOR_ROLES_JURUSAN`)
+- [x] **T7.5.3** — Filter konflik berdasarkan jenis dan severity
 
 ### 7.6 Halaman Laporan
 
-- [ ] **T7.6.1** — Halaman Rekap SKS (`/laporan/sks`): tabel dosen × kolom beban SKS per prodi + total; visual bar per dosen
+- [x] **T7.6.1** — Halaman Rekap SKS (`/laporan/sks`): tabel dosen × kolom beban SKS per prodi + total; visual bar per dosen
 - [ ] **T7.6.2** — Halaman Peta Ruang (`/laporan/ruang`): grid hari × timeslot per ruang; sel berisi nama MK atau kosong
-- [ ] **T7.6.3** — Halaman Ringkasan Preferensi (`/laporan/preferensi`): tabel per dosen — jumlah preferensi diajukan, jumlah dipenuhi, jumlah dilanggar; filter per fase (pre-schedule/post-draft)
+- [x] **T7.6.3** — Halaman Ringkasan Preferensi (`/laporan/preferensi`): tabel per dosen — jumlah preferensi diajukan, jumlah dipenuhi, jumlah dilanggar; filter per fase (pre-schedule/post-draft)
 
 ### 7.7 Halaman Ketua Jurusan
 
@@ -266,10 +266,10 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 7.8 Halaman Dosen (Role: Dosen)
 
-- [ ] **T7.8.1** — Halaman Jadwal Saya (`/jadwal-saya`): tampilan tabel mingguan jadwal mengajar dosen aktif
-- [ ] **T7.8.2** — Halaman Unavailability (`/preferensi`): grid timeslot per hari; toggle slot tidak tersedia; simpan ke `POST /dosen/{id}/unavailability`
-- [ ] **T7.8.3** — Halaman Preferensi Hari (`/preferensi/hari`): form pengajuan preferensi hari mengajar; pilih fase (pre-schedule/post-draft), pilih timeslot yang diinginkan, isi catatan; tampilkan status preferensi yang sudah diajukan (dipenuhi/dilanggar)
-- [ ] **T7.8.4** — Halaman Team Teaching Dosen (`/team-teaching`): tampilkan daftar MK yang diampu sebagai team teaching; form set urutan masuk kelas pra-UTS per assignment; tombol "Swap Pasca-UTS"; hanya tampil jika dosen memiliki assignment dengan `dosen2_id` tidak NULL
+- [x] **T7.8.1** — Halaman Jadwal Saya (`/jadwal-saya`): tampilan tabel mingguan jadwal mengajar dosen aktif
+- [x] **T7.8.2** — Halaman Unavailability (`/preferensi`): grid timeslot per hari; toggle slot tidak tersedia; simpan ke `POST /dosen/{id}/unavailability`
+- [x] **T7.8.3** — Halaman Preferensi Hari (`/preferensi/hari`): form pengajuan preferensi hari mengajar; pilih fase (pre-schedule/post-draft), pilih timeslot yang diinginkan, isi catatan; tampilkan status preferensi yang sudah diajukan (dipenuhi/dilanggar)
+- [x] **T7.8.4** — Halaman Team Teaching Dosen (`/team-teaching`): tampilkan daftar MK yang diampu sebagai team teaching; form set urutan masuk kelas pra-UTS per assignment; tombol "Swap Pasca-UTS"; hanya tampil jika dosen memiliki assignment dengan `dosen2_id` tidak NULL
 
 ### 7.9 Halaman Import/Export (Admin)
 
@@ -303,12 +303,12 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 **Tujuan:** Menyiapkan sistem untuk berjalan di server intranet kampus.
 
-- [ ] **T9.1** — Finalisasi `docker-compose.yml` untuk produksi: volume persisten untuk PostgreSQL, restart policy, healthcheck
-- [ ] **T9.2** — Konfigurasi Nginx sebagai reverse proxy untuk frontend dan backend API
-- [ ] **T9.3** — Buat script `init.sh` untuk first-run: jalankan migrasi, seed data (timeslot, user admin default)
-- [ ] **T9.4** — Buat `docker-compose.override.yml` untuk environment development (hot reload, exposed ports)
-- [ ] **T9.5** — Test deployment di mesin bersih dengan `docker compose up --build`
-- [ ] **T9.6** — Dokumentasi: cara instalasi, cara backup database PostgreSQL, cara update versi
+- [x] **T9.1** — Finalisasi `docker-compose.yml` untuk produksi: volume persisten untuk PostgreSQL, restart policy, healthcheck
+- [x] **T9.2** — Konfigurasi Nginx sebagai reverse proxy untuk frontend dan backend API
+- [x] **T9.3** — Buat script `init.sh` untuk first-run: jalankan migrasi, seed data (timeslot, user admin default)
+- [x] **T9.4** — Buat `docker-compose.override.yml` untuk environment development (hot reload, exposed ports)
+- [x] **T9.5** — Test deployment di mesin bersih dengan `docker compose up --build`
+- [x] **T9.6** — Dokumentasi: cara instalasi, cara backup database PostgreSQL, cara update versi
 
 ---
 

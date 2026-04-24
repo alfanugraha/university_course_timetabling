@@ -51,7 +51,6 @@ const EMPTY_KELAS_FORM: MataKuliahKelasPayload = {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MataKuliahPage() {
-  const queryClient = useQueryClient()
   const { user } = useAuthStore()
   const canEdit = EDITOR_ROLES.includes(user?.role ?? '')
 

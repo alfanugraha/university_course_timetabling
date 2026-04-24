@@ -309,7 +309,7 @@ export default function TeamTeachingPage() {
 
   // ── RBAC: can dosen edit this row? ─────────────────────────────────────────
 
-  function canDosenEdit(row: TeamTeachingRow): boolean {
+  function canDosenEdit(_row: TeamTeachingRow): boolean {
     if (!isDosen || !user) return false
     // We need to check if user's dosen record matches dosen1 or dosen2
     // The backend filters assignments to only show dosen's own, so all rows are editable

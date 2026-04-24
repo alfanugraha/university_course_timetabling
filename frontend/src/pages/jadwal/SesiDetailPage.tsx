@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Filter, X, Plus, Pencil, Users, AlertCircle, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Filter, X, Plus, Pencil, Users, AlertCircle, AlertTriangle, ShieldAlert } from 'lucide-react'
 import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 import { DataTable, ColumnDef } from '@/components/DataTable'
@@ -13,7 +13,6 @@ import { useAuthStore } from '@/store/authStore'
 import { getSesiList, SesiJadwal } from '@/api/sesi'
 import { getAssignments, Assignment, AssignmentListParams } from '@/api/assignment'
 import { getProdi, Prodi } from '@/api/prodi'
-import { getTimeslots, Timeslot } from '@/api/timeslot'
 import { getConflicts, ConflictLog } from '@/api/conflict'
 
 // ─── RBAC ─────────────────────────────────────────────────────────────────────
@@ -448,11 +447,6 @@ export default function SesiDetailPage() {
     queryFn: getProdi,
   })
 
-  const { data: timeslots = [] } = useQuery<Timeslot[]>({
-    queryKey: ['timeslots'],
-    queryFn: getTimeslots,
-  })
-
   const queryParams: AssignmentListParams = {
     page,
     page_size: PAGE_SIZE,
@@ -549,6 +543,13 @@ export default function SesiDetailPage() {
               <div className="text-[10px] text-slate-400">total assignment</div>
             </div>
           )}
+          <Link
+            to={`/sesi/${sesiId}/konflik`}
+            className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <ShieldAlert size={14} />
+            Konflik
+          </Link>
           <Link
             to={`/sesi/${sesiId}/team-teaching`}
             className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"

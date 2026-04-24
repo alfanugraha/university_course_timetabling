@@ -19,7 +19,6 @@ const STATUS_VARIANT: Record<string, string> = {
 }
 
 const STATUS_OPTIONS = ['Aktif', 'Non-Aktif', 'Pensiun'] as const
-type DosenStatus = (typeof STATUS_OPTIONS)[number]
 
 // ─── Empty form state ─────────────────────────────────────────────────────────
 

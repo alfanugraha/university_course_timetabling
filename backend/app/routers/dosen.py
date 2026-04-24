@@ -224,6 +224,31 @@ def list_unavailability(
     return q.all()
 
 
+@router.delete(
+    "/{dosen_id}/unavailability/{unavail_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_unavailability(
+    dosen_id: uuid.UUID,
+    unavail_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role(_UNAVAIL_ROLES)),
+):
+    """Hapus slot unavailability dosen. EDITOR_ROLES_JURUSAN atau dosen (own)."""
+    dosen = _get_dosen_or_404(dosen_id, db)
+    _check_own_access(current_user, dosen)
+
+    unavail = db.get(DosenUnavailability, unavail_id)
+    if unavail is None or unavail.dosen_id != dosen_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Unavailability dengan id '{unavail_id}' tidak ditemukan",
+        )
+
+    db.delete(unavail)
+    db.commit()
+
+
 # ---------------------------------------------------------------------------
 # Preference endpoints
 # ---------------------------------------------------------------------------

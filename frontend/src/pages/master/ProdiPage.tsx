@@ -230,7 +230,7 @@ export default function ProdiPage() {
   ]
 
   // ── Kurikulum columns ─────────────────────────────────────────────────────
-  function getKurikulumColumns(prodiId: string): ColumnDef<Record<string, unknown>>[] {
+  function getKurikulumColumns(_prodiId: string): ColumnDef<Record<string, unknown>>[] {
     return [
       { key: 'kode', label: 'Kode', sortable: true },
       { key: 'tahun', label: 'Tahun', sortable: true },

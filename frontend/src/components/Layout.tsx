@@ -17,6 +17,7 @@ import {
   ChevronRight,
   CalendarCheck,
   UserCircle,
+  UsersRound,
 } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -79,7 +80,9 @@ const NAV_SECTIONS: NavSection[] = [
     roles: ['dosen'],
     items: [
       { label: 'Jadwal Saya', to: '/jadwal-saya', icon: <CalendarCheck size={16} /> },
-      { label: 'Preferensi', to: '/preferensi', icon: <Star size={16} /> },
+      { label: 'Unavailability', to: '/preferensi', icon: <Star size={16} /> },
+      { label: 'Preferensi Hari', to: '/preferensi/hari', icon: <CalendarDays size={16} /> },
+      { label: 'Team Teaching', to: '/team-teaching', icon: <UsersRound size={16} /> },
     ],
   },
   {
@@ -114,6 +117,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   laporan: 'Laporan',
   sks: 'Rekap SKS',
   preferensi: 'Preferensi',
+  hari: 'Preferensi Hari',
   import: 'Import',
   'jadwal-saya': 'Jadwal Saya',
   'team-teaching': 'Team Teaching',
