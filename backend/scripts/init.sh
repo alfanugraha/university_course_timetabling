@@ -64,8 +64,10 @@ log "Migrations complete."
 # 3. Run seed script
 # ---------------------------------------------------------------------------
 
-log "Running seed script..."
+log "Running seed script (admin)..."
 python -m scripts.seed
+log "Running seed_master (master data)..."
+python -m scripts.seed_master
 log "Seed complete."
 
 # ---------------------------------------------------------------------------
