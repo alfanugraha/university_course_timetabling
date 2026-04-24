@@ -23,7 +23,10 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Skip the global 401 handler for the login endpoint itself so that
+    // Login.tsx can catch it and show "username/password salah" to the user.
+    const isAuthEndpoint = error.config?.url?.includes('/auth/login')
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       useAuthStore.getState().logout()
       window.location.href = '/login'
     }
