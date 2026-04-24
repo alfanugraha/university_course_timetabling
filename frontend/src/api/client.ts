@@ -1,8 +1,12 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
+// Dev  : VITE_API_URL is not set → baseURL '/api' → handled by Vite proxy or nginx
+// Prod : VITE_API_URL = 'https://<api-service>.up.railway.app' → direct API URL
+const baseURL = import.meta.env.VITE_API_URL ?? '/api'
+
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

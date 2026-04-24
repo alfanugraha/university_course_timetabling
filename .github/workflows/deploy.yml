@@ -1,0 +1,52 @@
+name: Deploy
+
+# Triggers only after CI passes on the main branch.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy (Cloudflare Pages + Render)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 1. Build frontend with production API URL ──────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend (production)
+        run: npm run build
+        working-directory: frontend
+        env:
+          # Set in GitHub Secrets → VITE_API_URL = https://cts-api.onrender.com
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      # ── 2. Deploy frontend → Cloudflare Pages ─────────────────────────────
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy frontend/dist --project-name=${{ secrets.CLOUDFLARE_PAGES_PROJECT }}
+
+      # ── 3. Trigger backend deployment → Render ────────────────────────────
+      # Render deploy hook: Dashboard → service → Settings → Deploy Hooks → Copy URL
+      - name: Trigger Render backend deploy
+        run: |
+          curl -s --fail-with-body \
+            "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        # On failure, print a warning but don't block the workflow
+        continue-on-error: true

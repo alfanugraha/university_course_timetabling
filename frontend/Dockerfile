@@ -7,6 +7,12 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# VITE_API_URL is injected at build time by Railway/Render.
+# Default '/' keeps relative paths working for self-hosted nginx proxy setups.
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Stage 2: Serve
