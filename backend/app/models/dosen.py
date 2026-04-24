@@ -17,6 +17,8 @@ from app.models.base import Base, BaseMixin
 
 if TYPE_CHECKING:
     from app.models.prodi import Prodi
+    from app.models.sesi_jadwal import SesiJadwal
+    from app.models.timeslot import Timeslot
     from app.models.user import User
 
 
@@ -78,6 +80,8 @@ class DosenUnavailability(BaseMixin, Base):
 
     # Relationships
     dosen: Mapped["Dosen"] = relationship("Dosen", back_populates="unavailabilities")
+    timeslot: Mapped[Optional["Timeslot"]] = relationship("Timeslot", foreign_keys=[timeslot_id])
+    sesi: Mapped[Optional["SesiJadwal"]] = relationship("SesiJadwal", foreign_keys=[sesi_id])
 
     __table_args__ = (
         UniqueConstraint("dosen_id", "timeslot_id", "sesi_id", name="uq_dosen_unavail"),

@@ -103,12 +103,12 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 - [x] **T2.2.2** — CRUD `Kurikulum`: `GET /kurikulum`, `POST /kurikulum`, `PUT /kurikulum/{id}`
 - [x] **T2.2.3** — CRUD `MataKuliah`: `GET /mata-kuliah` (dengan filter prodi/kurikulum/semester), `POST`, `PUT`, `DELETE`
 - [x] **T2.2.4** — CRUD `MataKuliahKelas`: `GET /mata-kuliah/{id}/kelas`, `POST`, `PUT`, `DELETE`
-- [-] **T2.2.5** — CRUD `Ruang`: `GET /ruang`, `POST`, `PUT`
-- [~] **T2.2.6** — CRUD `Timeslot`: `GET /timeslot`, `POST`, `PUT`
-- [~] **T2.2.7** — CRUD `Dosen`: `GET /dosen`, `POST`, `PUT` (termasuk filter homebase, status)
-- [~] **T2.2.8** — Endpoint `POST /dosen/{id}/unavailability` dan `GET /dosen/{id}/unavailability`
-- [~] **T2.2.8b** — Endpoint preferensi dosen: `GET /dosen/{id}/preferences`, `POST /dosen/{id}/preferences` (dengan field `fase`: `pre_schedule`/`post_draft`), `PUT /dosen/{id}/preferences/{pid}`, `DELETE /dosen/{id}/preferences/{pid}`; validasi bahwa dosen hanya dapat mengelola preferensi dirinya sendiri
-- [~] **T2.2.9** — CRUD `User` (admin only): `GET /users`, `POST /users`, `PUT /users/{id}`, `PATCH /users/{id}/reset-password`
+- [x] **T2.2.5** — CRUD `Ruang`: `GET /ruang`, `POST`, `PUT`
+- [x] **T2.2.6** — CRUD `Timeslot`: `GET /timeslot`, `POST`, `PUT`
+- [x] **T2.2.7** — CRUD `Dosen`: `GET /dosen`, `POST`, `PUT` (termasuk filter homebase, status)
+- [x] **T2.2.8** — Endpoint `POST /dosen/{id}/unavailability` dan `GET /dosen/{id}/unavailability`
+- [x] **T2.2.8b** — Endpoint preferensi dosen: `GET /dosen/{id}/preferences`, `POST /dosen/{id}/preferences` (dengan field `fase`: `pre_schedule`/`post_draft`), `PUT /dosen/{id}/preferences/{pid}`, `DELETE /dosen/{id}/preferences/{pid}`; validasi bahwa dosen hanya dapat mengelola preferensi dirinya sendiri
+- [x] **T2.2.9** — CRUD `User` (admin only): `GET /users`, `POST /users`, `PUT /users/{id}`, `PATCH /users/{id}/reset-password`
 
 ---
 
@@ -116,15 +116,15 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 **Tujuan:** Membangun endpoint untuk manajemen sesi jadwal dan penugasan (assignment).
 
-- [ ] **T3.1** — CRUD `SesiJadwal`: `GET /sesi`, `POST /sesi`, `PUT /sesi/{id}` (transisi status Draft → Aktif → Arsip; akses: `EDITOR_ROLES_JURUSAN`); tambah `PATCH /sesi/{id}/approve` dan `PATCH /sesi/{id}/publish` (akses: `ketua_jurusan`)
-- [ ] **T3.2** — `GET /sesi/{id}/assignments` — kembalikan daftar assignment dengan filtering (prodi, hari, semester) dan pagination; filter role: `koordinator_prodi` dan `tendik_prodi` hanya melihat prodi sendiri; `dosen` hanya melihat assignment dirinya; `ketua_jurusan` melihat semua
-- [ ] **T3.3** — `POST /sesi/{id}/assignments` — tambah assignment baru; validasi dasar (dosen aktif, timeslot & ruang valid, sesi masih Draft/Aktif); akses: `EDITOR_ROLES_PRODI`
-- [ ] **T3.4** — `PUT /sesi/{id}/assignments/{aid}` — update assignment; catat `updated_at`; akses: `EDITOR_ROLES_PRODI`
-- [ ] **T3.4b** — `PATCH /sesi/{id}/assignments/{aid}/override-floor` — toggle `override_floor_priority`; akses: `EDITOR_ROLES_JURUSAN`; kembalikan assignment yang diupdate
-- [ ] **T3.5** — `DELETE /sesi/{id}/assignments/{aid}` — hapus assignment (hard delete); akses: `EDITOR_ROLES_JURUSAN`
-- [ ] **T3.7** — Endpoint team teaching: `GET /sesi/{id}/assignments/{aid}/team-teaching` (akses: semua role termasuk dosen own), `PUT /sesi/{id}/assignments/{aid}/team-teaching` (set urutan masuk kelas pra-UTS; akses: **Dosen own saja**), `POST /sesi/{id}/assignments/{aid}/team-teaching/swap` (jadwalkan pertukaran pasca-UTS; akses: **Dosen own saja**); validasi bahwa assignment memiliki `dosen2_id` (bukan NULL) dan bahwa dosen yang mengakses adalah dosen1 atau dosen2 dari assignment tersebut
-- [ ] **T3.8** — Endpoint `GET /sesi/{id}/preferences-summary` — kembalikan ringkasan pelanggaran preferensi dosen: total preferensi, total dilanggar, breakdown per dosen; akses: `EDITOR_ROLES_JURUSAN`, `ketua_jurusan`
-- [ ] **T3.6** — Test: buat assignment valid, buat assignment dengan data tidak lengkap, update, hapus, filter per prodi; test akses `sekretaris_jurusan` dan `tendik_jurusan` dapat edit semua prodi; test akses `koordinator_prodi` dan `tendik_prodi` hanya dapat edit prodi sendiri; test akses `ketua_jurusan` hanya read; test akses `dosen` ditolak untuk edit
+- [x] **T3.1** — CRUD `SesiJadwal`: `GET /sesi`, `POST /sesi`, `PUT /sesi/{id}` (transisi status Draft → Aktif → Arsip; akses: `EDITOR_ROLES_JURUSAN`); tambah `PATCH /sesi/{id}/approve` dan `PATCH /sesi/{id}/publish` (akses: `ketua_jurusan`)
+- [x] **T3.2** — `GET /sesi/{id}/assignments` — kembalikan daftar assignment dengan filtering (prodi, hari, semester) dan pagination; filter role: `koordinator_prodi` dan `tendik_prodi` hanya melihat prodi sendiri; `dosen` hanya melihat assignment dirinya; `ketua_jurusan` melihat semua
+- [x] **T3.3** — `POST /sesi/{id}/assignments` — tambah assignment baru; validasi dasar (dosen aktif, timeslot & ruang valid, sesi masih Draft/Aktif); akses: `EDITOR_ROLES_PRODI`
+- [x] **T3.4** — `PUT /sesi/{id}/assignments/{aid}` — update assignment; catat `updated_at`; akses: `EDITOR_ROLES_PRODI`
+- [x] **T3.4b** — `PATCH /sesi/{id}/assignments/{aid}/override-floor` — toggle `override_floor_priority`; akses: `EDITOR_ROLES_JURUSAN`; kembalikan assignment yang diupdate
+- [x] **T3.5** — `DELETE /sesi/{id}/assignments/{aid}` — hapus assignment (hard delete); akses: `EDITOR_ROLES_JURUSAN`
+- [x] **T3.7** — Endpoint team teaching: `GET /sesi/{id}/assignments/{aid}/team-teaching` (akses: semua role termasuk dosen own), `PUT /sesi/{id}/assignments/{aid}/team-teaching` (set urutan masuk kelas pra-UTS; akses: **Dosen own saja**), `POST /sesi/{id}/assignments/{aid}/team-teaching/swap` (jadwalkan pertukaran pasca-UTS; akses: **Dosen own saja**); validasi bahwa assignment memiliki `dosen2_id` (bukan NULL) dan bahwa dosen yang mengakses adalah dosen1 atau dosen2 dari assignment tersebut
+- [x] **T3.8** — Endpoint `GET /sesi/{id}/preferences-summary` — kembalikan ringkasan pelanggaran preferensi dosen: total preferensi, total dilanggar, breakdown per dosen; akses: `EDITOR_ROLES_JURUSAN`, `ketua_jurusan`
+- [x] **T3.6** — Test: buat assignment valid, buat assignment dengan data tidak lengkap, update, hapus, filter per prodi; test akses `sekretaris_jurusan` dan `tendik_jurusan` dapat edit semua prodi; test akses `koordinator_prodi` dan `tendik_prodi` hanya dapat edit prodi sendiri; test akses `ketua_jurusan` hanya read; test akses `dosen` ditolak untuk edit
 
 ---
 
@@ -134,40 +134,40 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 4.1 Core Engine
 
-- [ ] **T4.1.1** — Buat `ConflictResult` dataclass: `jenis`, `severity`, `assignment_ids`, `pesan`, `detail`
-- [ ] **T4.1.2** — Buat `ConflictEngine` class di `backend/app/services/conflict_engine.py` dengan method `run(sesi_id)` yang mengorkestrasikan semua rule
-- [ ] **T4.1.3** — Implementasi `check_lecturer_double()` — HC-01: deteksi dosen1 atau dosen2 di timeslot yang sama dalam satu sesi
-- [ ] **T4.1.4** — Implementasi `check_room_double()` — HC-02: deteksi ruang yang sama di timeslot yang sama
-- [-] **T4.1.5** — ~~Implementasi `check_bkd_limit()` — HC-04~~ **DEFERRED** — Ditunda ke Fase berikutnya. Ketentuan BKD bertingkat (minimum 9 SKS, distribusi berdasarkan masa kerja) belum dapat diimplementasikan karena data masa kerja dosen belum tersedia. Kolom `bkd_limit_sks` tersedia di skema sebagai placeholder.
-- [-] **T4.1.5b** — ~~Implementasi `check_bkd_minimum()`~~ **DIBATALKAN** — sesuai revisi v1.4.0; HC-04 kembali ke DEFERRED.
-- [ ] **T4.1.6** — Implementasi `check_lecturer_unavail()` — HC-06: deteksi assignment pada slot dosen_unavailability
-- [ ] **T4.1.7** — Implementasi `check_parallel_mismatch()` — HC-07: kelompokkan assignment berdasarkan `mata_kuliah_id` induk; ERROR jika kelas paralel dalam satu MK memiliki `timeslot_id` berbeda; pesan harus menyebut kelas mana saja yang bermasalah
-- [ ] **T4.1.8** — Implementasi `check_student_daily_load()` — HC-08: untuk setiap (prodi, semester, hari), hitung jumlah MK dan total SKS; ERROR jika jumlah_mk > 2 atau total_sks > 6
-- [ ] **T4.1.9** — Implementasi `check_lecturer_daily_load()` — HC-09: untuk setiap (dosen, hari), kumpulkan semua assignment di mana dosen muncul sebagai dosen1 atau dosen2; ERROR jika jumlah_mk > 2 atau total_sks > 6
-- [ ] **T4.1.10** — Implementasi `check_student_conflict()` — SC-01: deteksi mata kuliah satu semester satu prodi yang dijadwalkan bersamaan (WARNING; pelengkap informatif dari HC-08)
-- [ ] **T4.1.11** — Implementasi `check_workload_equity()` — SC-02: hitung simpangan baku beban SKS per prodi, flag sebagai WARNING jika std dev > threshold (konfigurasi)
-- [ ] **T4.1.12** — Implementasi `check_lecturer_preference()` — SC-03: untuk setiap dosen dalam sesi, bandingkan `dosen_preference` dengan assignment aktual; update `is_violated = TRUE` pada preferensi yang tidak dipenuhi; kembalikan WARNING `LECTURER_PREFERENCE_VIOLATED` per preferensi yang dilanggar; simpan ringkasan `total_violated` ke `conflict_log.detail`
-- [ ] **T4.1.13** — Implementasi `check_floor_priority()` — SC-05: untuk setiap timeslot dalam sesi, ambil semua assignment yang memiliki `ruang_id` dan `dosen.tgl_lahir` terisi dan `override_floor_priority = FALSE`; urutkan dosen berdasarkan usia (senior = lebih tua); bandingkan dengan urutan lantai ruang; WARNING `FLOOR_PRIORITY_VIOLATED` jika dosen senior ditempatkan di lantai lebih tinggi dari dosen yang lebih muda; lewati jika `ruang.lantai` NULL
+- [x] **T4.1.1** — Buat `ConflictResult` dataclass: `jenis`, `severity`, `assignment_ids`, `pesan`, `detail`
+- [x] **T4.1.2** — Buat `ConflictEngine` class di `backend/app/services/conflict_engine.py` dengan method `run(sesi_id)` yang mengorkestrasikan semua rule
+- [x] **T4.1.3** — Implementasi `check_lecturer_double()` — HC-01: deteksi dosen1 atau dosen2 di timeslot yang sama dalam satu sesi
+- [x] **T4.1.4** — Implementasi `check_room_double()` — HC-02: deteksi ruang yang sama di timeslot yang sama
+- [x] **T4.1.5** — ~~Implementasi `check_bkd_limit()` — HC-04~~ **DEFERRED** — Ditunda ke Fase berikutnya. Ketentuan BKD bertingkat (minimum 9 SKS, distribusi berdasarkan masa kerja) belum dapat diimplementasikan karena data masa kerja dosen belum tersedia. Kolom `bkd_limit_sks` tersedia di skema sebagai placeholder.
+- [x] **T4.1.5b** — ~~Implementasi `check_bkd_minimum()`~~ **DIBATALKAN** — sesuai revisi v1.4.0; HC-04 kembali ke DEFERRED.
+- [x] **T4.1.6** — Implementasi `check_lecturer_unavail()` — HC-06: deteksi assignment pada slot dosen_unavailability
+- [x] **T4.1.7** — Implementasi `check_parallel_mismatch()` — HC-07: kelompokkan assignment berdasarkan `mata_kuliah_id` induk; ERROR jika kelas paralel dalam satu MK memiliki `timeslot_id` berbeda; pesan harus menyebut kelas mana saja yang bermasalah
+- [x] **T4.1.8** — Implementasi `check_student_daily_load()` — HC-08: untuk setiap (prodi, semester, hari), hitung jumlah MK dan total SKS; ERROR jika jumlah_mk > 2 atau total_sks > 6
+- [x] **T4.1.9** — Implementasi `check_lecturer_daily_load()` — HC-09: untuk setiap (dosen, hari), kumpulkan semua assignment di mana dosen muncul sebagai dosen1 atau dosen2; ERROR jika jumlah_mk > 2 atau total_sks > 6
+- [x] **T4.1.10** — Implementasi `check_student_conflict()` — SC-01: deteksi mata kuliah satu semester satu prodi yang dijadwalkan bersamaan (WARNING; pelengkap informatif dari HC-08)
+- [x] **T4.1.11** — Implementasi `check_workload_equity()` — SC-02: hitung simpangan baku beban SKS per prodi, flag sebagai WARNING jika std dev > threshold (konfigurasi)
+- [x] **T4.1.12** — Implementasi `check_lecturer_preference()` — SC-03: untuk setiap dosen dalam sesi, bandingkan `dosen_preference` dengan assignment aktual; update `is_violated = TRUE` pada preferensi yang tidak dipenuhi; kembalikan WARNING `LECTURER_PREFERENCE_VIOLATED` per preferensi yang dilanggar; simpan ringkasan `total_violated` ke `conflict_log.detail`
+- [x] **T4.1.13** — Implementasi `check_floor_priority()` — SC-05: untuk setiap timeslot dalam sesi, ambil semua assignment yang memiliki `ruang_id` dan `dosen.tgl_lahir` terisi dan `override_floor_priority = FALSE`; urutkan dosen berdasarkan usia (senior = lebih tua); bandingkan dengan urutan lantai ruang; WARNING `FLOOR_PRIORITY_VIOLATED` jika dosen senior ditempatkan di lantai lebih tinggi dari dosen yang lebih muda; lewati jika `ruang.lantai` NULL
 
 ### 4.2 Integrasi API
 
-- [ ] **T4.2.1** — `POST /sesi/{id}/check-conflicts` — jalankan engine, simpan hasil ke `conflict_log`, kembalikan ringkasan (jumlah ERROR, jumlah WARNING)
-- [ ] **T4.2.2** — `GET /sesi/{id}/conflicts` — kembalikan daftar konflik dari `conflict_log` terbaru dengan filter jenis/severity
-- [ ] **T4.2.3** — `PATCH /sesi/{id}/conflicts/{cid}/resolve` — tandai konflik sebagai resolved
+- [x] **T4.2.1** — `POST /sesi/{id}/check-conflicts` — jalankan engine, simpan hasil ke `conflict_log`, kembalikan ringkasan (jumlah ERROR, jumlah WARNING)
+- [x] **T4.2.2** — `GET /sesi/{id}/conflicts` — kembalikan daftar konflik dari `conflict_log` terbaru dengan filter jenis/severity
+- [x] **T4.2.3** — `PATCH /sesi/{id}/conflicts/{cid}/resolve` — tandai konflik sebagai resolved
 
 ### 4.3 Testing Conflict Engine
 
-- [ ] **T4.3.1** — Unit test HC-01: fixture dua assignment dosen sama & timeslot sama → assert ERROR `LECTURER_DOUBLE`
-- [ ] **T4.3.2** — Unit test HC-02: fixture dua assignment ruang sama & timeslot sama (ruang_id tidak NULL) → assert ERROR `ROOM_DOUBLE`; pastikan tidak ERROR jika ruang_id NULL
-- [-] **T4.3.3** — ~~Unit test HC-04~~ **DEFERRED** — sesuai T4.1.5
-- [-] **T4.3.3b** — ~~Unit test HC-04 minimum~~ **DIBATALKAN** — sesuai revisi v1.4.0
-- [ ] **T4.3.4** — Unit test HC-07: fixture tiga kelas paralel (A, B, C) di mana kelas C di slot berbeda → assert ERROR `PARALLEL_MISMATCH`; pastikan tidak ERROR jika semua kelas di slot sama
-- [ ] **T4.3.5** — Unit test HC-08: fixture prodi+semester dengan 3 MK di hari yang sama → assert ERROR `STUDENT_DAILY_OVERLOAD`; fixture 2 MK (6 SKS) → assert tidak ERROR
-- [ ] **T4.3.6** — Unit test HC-09: fixture dosen dengan 3 MK di hari yang sama → assert ERROR `LECTURER_DAILY_OVERLOAD`; fixture 1 MK sebagai dosen2 + 1 MK sebagai dosen1 di hari sama (total 2) → assert tidak ERROR
-- [ ] **T4.3.7** — Unit test SC-01: fixture dua MK semester sama & prodi sama di timeslot sama → assert WARNING `STUDENT_CONFLICT`
-- [ ] **T4.3.9** — Unit test SC-03: fixture dosen dengan preferensi hari Senin, assignment dosen di hari Rabu → assert WARNING `LECTURER_PREFERENCE_VIOLATED` dan `is_violated = TRUE`; fixture dosen dengan preferensi hari Senin, assignment di hari Senin → assert tidak ada WARNING SC-03
-- [ ] **T4.3.10** — Unit test SC-05: fixture dua assignment di timeslot sama — dosen senior (lahir 1965) di lantai 3, dosen junior (lahir 1985) di lantai 1 → assert WARNING `FLOOR_PRIORITY_VIOLATED`; fixture dosen senior di lantai 1, dosen junior di lantai 3 → assert tidak ada WARNING; fixture assignment dengan `override_floor_priority = TRUE` → assert tidak ada WARNING meskipun urutan lantai terbalik; fixture tanpa `tgl_lahir` atau tanpa `ruang.lantai` → assert tidak ada WARNING
-- [ ] **T4.3.8** — Integration test: import jadwal dari fixture Excel (Genap 2025-2026), jalankan `check-conflicts`, verifikasi jenis konflik yang diketahui manual muncul dengan severity yang benar
+- [x] **T4.3.1** — Unit test HC-01: fixture dua assignment dosen sama & timeslot sama → assert ERROR `LECTURER_DOUBLE`
+- [x] **T4.3.2** — Unit test HC-02: fixture dua assignment ruang sama & timeslot sama (ruang_id tidak NULL) → assert ERROR `ROOM_DOUBLE`; pastikan tidak ERROR jika ruang_id NULL
+- [x] **T4.3.3** — ~~Unit test HC-04~~ **DEFERRED** — sesuai T4.1.5
+- [x] **T4.3.3b** — ~~Unit test HC-04 minimum~~ **DIBATALKAN** — sesuai revisi v1.4.0
+- [x] **T4.3.4** — Unit test HC-07: fixture tiga kelas paralel (A, B, C) di mana kelas C di slot berbeda → assert ERROR `PARALLEL_MISMATCH`; pastikan tidak ERROR jika semua kelas di slot sama
+- [x] **T4.3.5** — Unit test HC-08: fixture prodi+semester dengan 3 MK di hari yang sama → assert ERROR `STUDENT_DAILY_OVERLOAD`; fixture 2 MK (6 SKS) → assert tidak ERROR
+- [x] **T4.3.6** — Unit test HC-09: fixture dosen dengan 3 MK di hari yang sama → assert ERROR `LECTURER_DAILY_OVERLOAD`; fixture 1 MK sebagai dosen2 + 1 MK sebagai dosen1 di hari sama (total 2) → assert tidak ERROR
+- [x] **T4.3.7** — Unit test SC-01: fixture dua MK semester sama & prodi sama di timeslot sama → assert WARNING `STUDENT_CONFLICT`
+- [x] **T4.3.9** — Unit test SC-03: fixture dosen dengan preferensi hari Senin, assignment dosen di hari Rabu → assert WARNING `LECTURER_PREFERENCE_VIOLATED` dan `is_violated = TRUE`; fixture dosen dengan preferensi hari Senin, assignment di hari Senin → assert tidak ada WARNING SC-03
+- [x] **T4.3.10** — Unit test SC-05: fixture dua assignment di timeslot sama — dosen senior (lahir 1965) di lantai 3, dosen junior (lahir 1985) di lantai 1 → assert WARNING `FLOOR_PRIORITY_VIOLATED`; fixture dosen senior di lantai 1, dosen junior di lantai 3 → assert tidak ada WARNING; fixture assignment dengan `override_floor_priority = TRUE` → assert tidak ada WARNING meskipun urutan lantai terbalik; fixture tanpa `tgl_lahir` atau tanpa `ruang.lantai` → assert tidak ada WARNING
+- [x] **T4.3.8** — Integration test: import jadwal dari fixture Excel (Genap 2025-2026), jalankan `check-conflicts`, verifikasi jenis konflik yang diketahui manual muncul dengan severity yang benar
 
 ---
 
@@ -179,26 +179,26 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 > Basis data Excel yang ada saat ini belum dinormalisasi — strukturnya dibangun di sekitar formula XLOOKUP dan validasi manual, bukan relasi antar tabel. Importer harus menerapkan strategi **tolerant import**: setiap baris diproses secara independen dalam blok `try/except`; baris yang gagal dicatat ke `import_warning_log` (in-memory, dikembalikan ke user) tanpa membatalkan seluruh proses import.
 
-- [ ] **T5.0.1** — Buat `ImportResult` dataclass: `total`, `inserted`, `updated`, `skipped`, `warnings: list[ImportWarning]`; setiap `ImportWarning` memuat nomor baris, nama sheet, nilai bermasalah, dan alasan dilewati
-- [ ] **T5.0.2** — Buat helper `normalize_str(val)`: strip whitespace, lowercase untuk perbandingan lookup (banyak nilai di Excel memiliki spasi trailing atau kapitalisasi tidak konsisten)
-- [ ] **T5.0.3** — Buat helper `resolve_dosen(nama_or_kode, session)`: lookup dosen dari DB berdasarkan nama atau kode; kembalikan `None` (bukan exception) jika tidak ditemukan, dan catat sebagai warning — ini penting karena data dosen Excel belum lengkap
+- [x] **T5.0.1** — Buat `ImportResult` dataclass: `total`, `inserted`, `updated`, `skipped`, `warnings: list[ImportWarning]`; setiap `ImportWarning` memuat nomor baris, nama sheet, nilai bermasalah, dan alasan dilewati
+- [x] **T5.0.2** — Buat helper `normalize_str(val)`: strip whitespace, lowercase untuk perbandingan lookup (banyak nilai di Excel memiliki spasi trailing atau kapitalisasi tidak konsisten)
+- [x] **T5.0.3** — Buat helper `resolve_dosen(nama_or_kode, session)`: lookup dosen dari DB berdasarkan nama atau kode; kembalikan `None` (bukan exception) jika tidak ditemukan, dan catat sebagai warning — ini penting karena data dosen Excel belum lengkap
 
 ### 5.1 Importer
 
-- [ ] **T5.1.1** — Buat `ExcelImporter` class di `backend/app/services/excel_importer.py`; injeksikan `db_session`; semua method mengembalikan `ImportResult`
-- [ ] **T5.1.2** — Implementasi `import_master_db(file)` — baca sheet `db_prodi`, `db_dosen`, `Ruang Kuliah`, `Mata Kuliah`, `Kurikulum` dari `db.xlsx`; upsert berdasarkan kode unik; toleran terhadap kolom kosong (khususnya kolom dosen seperti `nidn`, `nip` yang sering NULL); catat baris bermasalah sebagai warning
-- [ ] **T5.1.3** — Implementasi `import_mata_kuliah_kelas(file)` — baca sheet `db_kelas` dari `db_mata_kuliah.xlsx`; buat `MataKuliahKelas` record; lewati baris di mana `kode_mk` tidak ditemukan di tabel `mata_kuliah` (foreign key miss = warning, bukan error)
-- [-] **T5.1.4** — ~~Implementasi `import_timeslot(file)`~~ **TIDAK DIPERLUKAN** — Timeslot kini di-seed secara programatik (15 slot tetap, lihat T1.3.4). Sheet `db_timeslot` dari Excel tidak lagi dipakai sebagai sumber timeslot.
-- [ ] **T5.1.5** — Implementasi `import_jadwal(file, sesi_id)` — baca sheet jadwal dari file historis; parsing kolom Hari → `timeslot_id` via lookup (`hari` + `sesi` dari label waktu); Kode MK → `mk_kelas_id`; Dosen I/II → `dosen1_id`/`dosen2_id` via `resolve_dosen()`; `ruang_id` = NULL jika kolom Ruang kosong (opsional); buat `JadwalAssignment` record; catat baris gagal sebagai warning
-- [ ] **T5.1.6** — Endpoint `POST /import/master` — multipart upload file Excel; jalankan importer; kembalikan `ImportResult` sebagai JSON (berhasil, dilewati, daftar warnings)
-- [ ] **T5.1.7** — Endpoint `POST /import/jadwal` — multipart upload + `sesi_id` query param; jalankan importer jadwal; kembalikan `ImportResult`
-- [ ] **T5.1.8** — Test: import `db.xlsx` nyata → verifikasi jumlah record prodi, kurikulum, MK di DB; import jadwal `ED-8_...Genap 2025-2026 v3.xlsx` → verifikasi jumlah assignment dan semua baris warning ter-log dengan benar
+- [x] **T5.1.1** — Buat `ExcelImporter` class di `backend/app/services/excel_importer.py`; injeksikan `db_session`; semua method mengembalikan `ImportResult`
+- [x] **T5.1.2** — Implementasi `import_master_db(file)` — baca sheet `db_prodi`, `db_dosen`, `Ruang Kuliah`, `Mata Kuliah`, `Kurikulum` dari `db.xlsx`; upsert berdasarkan kode unik; toleran terhadap kolom kosong (khususnya kolom dosen seperti `nidn`, `nip` yang sering NULL); catat baris bermasalah sebagai warning
+- [x] **T5.1.3** — Implementasi `import_mata_kuliah_kelas(file)` — baca sheet `db_kelas` dari `db_mata_kuliah.xlsx`; buat `MataKuliahKelas` record; lewati baris di mana `kode_mk` tidak ditemukan di tabel `mata_kuliah` (foreign key miss = warning, bukan error)
+- [x] **T5.1.4** — ~~Implementasi `import_timeslot(file)`~~ **TIDAK DIPERLUKAN** — Timeslot kini di-seed secara programatik (15 slot tetap, lihat T1.3.4). Sheet `db_timeslot` dari Excel tidak lagi dipakai sebagai sumber timeslot.
+- [x] **T5.1.5** — Implementasi `import_jadwal(file, sesi_id)` — baca sheet jadwal dari file historis; parsing kolom Hari → `timeslot_id` via lookup (`hari` + `sesi` dari label waktu); Kode MK → `mk_kelas_id`; Dosen I/II → `dosen1_id`/`dosen2_id` via `resolve_dosen()`; `ruang_id` = NULL jika kolom Ruang kosong (opsional); buat `JadwalAssignment` record; catat baris gagal sebagai warning
+- [x] **T5.1.6** — Endpoint `POST /import/master` — multipart upload file Excel; jalankan importer; kembalikan `ImportResult` sebagai JSON (berhasil, dilewati, daftar warnings)
+- [x] **T5.1.7** — Endpoint `POST /import/jadwal` — multipart upload + `sesi_id` query param; jalankan importer jadwal; kembalikan `ImportResult`
+- [x] **T5.1.8** — Test: import `db.xlsx` nyata → verifikasi jumlah record prodi, kurikulum, MK di DB; import jadwal `ED-8_...Genap 2025-2026 v3.xlsx` → verifikasi jumlah assignment dan semua baris warning ter-log dengan benar
 
 ### 5.2 Exporter
 
-- [ ] **T5.2.1** — Buat `ExcelExporter` class di `backend/app/services/excel_exporter.py`
-- [ ] **T5.2.2** — Implementasi `export_jadwal(sesi_id)` — generate `.xlsx` dengan sheet jadwal utama dan sheet rekap beban SKS per dosen; format kolom sesuai template standar jurusan
-- [ ] **T5.2.3** — Endpoint `GET /sesi/{id}/export` — generate file dan stream sebagai download
+- [x] **T5.2.1** — Buat `ExcelExporter` class di `backend/app/services/excel_exporter.py`
+- [x] **T5.2.2** — Implementasi `export_jadwal(sesi_id)` — generate `.xlsx` dengan sheet jadwal utama dan sheet rekap beban SKS per dosen; format kolom sesuai template standar jurusan
+- [x] **T5.2.3** — Endpoint `GET /sesi/{id}/export` — generate file dan stream sebagai download
 - [ ] **T5.2.4** — Test: export sesi, buka file di Excel/openpyxl, verifikasi data konsisten dengan DB
 
 ---
@@ -207,9 +207,9 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 **Tujuan:** Membangun endpoint reporting yang dibutuhkan Admin dan Kaprodi.
 
-- [ ] **T6.1** — `GET /sesi/{id}/reports/sks-rekap` — rekap total SKS per dosen; breakdown per prodi (S1 MTK, S1 STK, S2 MTK, Layanan); flag dosen yang mendekati atau melebihi BKD limit
-- [ ] **T6.2** — `GET /sesi/{id}/reports/room-map` — peta penggunaan ruang: matrix hari × slot × ruang, isi sel = kode MK atau kosong; kembalikan sebagai JSON untuk dirender di frontend
-- [ ] **T6.3** — Test: verifikasi kalkulasi SKS dari data fixture; verifikasi room-map mendeteksi sel kosong dan terisi
+- [x] **T6.1** — `GET /sesi/{id}/reports/sks-rekap` — rekap total SKS per dosen; breakdown per prodi (S1 MTK, S1 STK, S2 MTK, Layanan); flag dosen yang mendekati atau melebihi BKD limit
+- [-] **T6.2** — `GET /sesi/{id}/reports/room-map` — peta penggunaan ruang: matrix hari × slot × ruang, isi sel = kode MK atau kosong; kembalikan sebagai JSON untuk dirender di frontend
+- [~] **T6.3** — Test: verifikasi kalkulasi SKS dari data fixture; verifikasi room-map mendeteksi sel kosong dan terisi
 
 ---
 
@@ -219,40 +219,40 @@ Setiap task di bawah mencakup: Pydantic schema (request/response), router handle
 
 ### 7.1 Setup & Shared Components
 
-- [ ] **T7.1.1** — Setup React Router: definisi route per halaman sesuai `design.md §5.1`
-- [ ] **T7.1.2** — Setup Axios instance dengan base URL, JWT interceptor (inject token di header, redirect ke login jika 401)
-- [ ] **T7.1.3** — Setup Zustand store: `authStore` (user, token, role)
-- [ ] **T7.1.4** — Komponen `Layout` (sidebar, header, breadcrumb)
-- [ ] **T7.1.5** — Komponen shared: `DataTable` (sortable, paginated), `FormModal`, `ConfirmDialog`, `Badge` status/severity
-- [ ] **T7.1.6** — Route guard `<PrivateRoute>` dan `<RoleGuard>` untuk proteksi halaman berdasarkan role
+- [x] **T7.1.1** — Setup React Router: definisi route per halaman sesuai `design.md §5.1`
+- [x] **T7.1.2** — Setup Axios instance dengan base URL, JWT interceptor (inject token di header, redirect ke login jika 401)
+- [x] **T7.1.3** — Setup Zustand store: `authStore` (user, token, role)
+- [x] **T7.1.4** — Komponen `Layout` (sidebar, header, breadcrumb)
+- [x] **T7.1.5** — Komponen shared: `DataTable` (sortable, paginated), `FormModal`, `ConfirmDialog`, `Badge` status/severity
+- [x] **T7.1.6** — Route guard `<PrivateRoute>` dan `<RoleGuard>` untuk proteksi halaman berdasarkan role
 
 ### 7.2 Halaman Autentikasi
 
-- [ ] **T7.2.1** — Halaman Login (`/login`): form username/password, panggil `POST /auth/login`, simpan token di store
-- [ ] **T7.2.2** — Halaman Profil (`/profile`): tampilkan info user, tombol logout
+- [x] **T7.2.1** — Halaman Login (`/login`): form username/password, panggil `POST /auth/login`, simpan token di store
+- [x] **T7.2.2** — Halaman Profil (`/profile`): tampilkan info user, tombol logout
 
 ### 7.3 Halaman Data Master
 
-- [ ] **T7.3.1** — Halaman Dosen (`/master/dosen`): DataTable daftar dosen + modal tambah/edit + filter status/homebase
-- [ ] **T7.3.2** — Halaman Mata Kuliah (`/master/mata-kuliah`): DataTable + modal + sub-halaman kelas paralel
-- [ ] **T7.3.3** — Halaman Ruang (`/master/ruang`): DataTable + modal tambah/edit
-- [ ] **T7.3.4** — Halaman Timeslot (`/master/timeslot`): DataTable read-only + modal (admin only)
-- [ ] **T7.3.5** — Halaman Prodi & Kurikulum (`/master/prodi`): DataTable + modal
+- [x] **T7.3.1** — Halaman Dosen (`/master/dosen`): DataTable daftar dosen + modal tambah/edit + filter status/homebase
+- [x] **T7.3.2** — Halaman Mata Kuliah (`/master/mata-kuliah`): DataTable + modal + sub-halaman kelas paralel
+- [x] **T7.3.3** — Halaman Ruang (`/master/ruang`): DataTable + modal tambah/edit
+- [x] **T7.3.4** — Halaman Timeslot (`/master/timeslot`): DataTable read-only + modal (admin only)
+- [x] **T7.3.5** — Halaman Prodi & Kurikulum (`/master/prodi`): DataTable + modal
 
 ### 7.4 Halaman Penjadwalan
 
-- [ ] **T7.4.1** — Halaman Daftar Sesi (`/sesi`): tabel sesi dengan status, tombol buat sesi baru
-- [ ] **T7.4.2** — Halaman Detail Sesi (`/sesi/:id`): tabel assignment lengkap dengan filter (prodi, hari, semester), pagination
-- [ ] **T7.4.3** — Form Tambah Assignment: dropdown beruntun (Prodi → Kurikulum → Semester → Kelas MK → Dosen → Timeslot → Ruang)
-- [ ] **T7.4.4** — Form Edit Assignment: pre-fill dari data existing
-- [ ] **T7.4.5** — Indikator konflik inline di tabel assignment: warna baris merah (ERROR) / kuning (WARNING); tooltip pesan konflik
-- [ ] **T7.4.6** — Halaman Team Teaching (`/sesi/:id/team-teaching`): tabel assignment team teaching (dosen2_id tidak NULL); tampilkan status konfigurasi per assignment (sudah diatur / belum); semua role pengelola hanya dapat melihat ringkasan — tombol edit tidak tersedia untuk mereka
+- [x] **T7.4.1** — Halaman Daftar Sesi (`/sesi`): tabel sesi dengan status, tombol buat sesi baru
+- [x] **T7.4.2** — Halaman Detail Sesi (`/sesi/:id`): tabel assignment lengkap dengan filter (prodi, hari, semester), pagination
+- [x] **T7.4.3** — Form Tambah Assignment: dropdown beruntun (Prodi → Kurikulum → Semester → Kelas MK → Dosen → Timeslot → Ruang)
+- [x] **T7.4.4** — Form Edit Assignment: pre-fill dari data existing
+- [x] **T7.4.5** — Indikator konflik inline di tabel assignment: warna baris merah (ERROR) / kuning (WARNING); tooltip pesan konflik
+- [x] **T7.4.6** — Halaman Team Teaching (`/sesi/:id/team-teaching`): tabel assignment team teaching (dosen2_id tidak NULL); tampilkan status konfigurasi per assignment (sudah diatur / belum); semua role pengelola hanya dapat melihat ringkasan — tombol edit tidak tersedia untuk mereka
 
 ### 7.5 Halaman Deteksi Konflik
 
-- [ ] **T7.5.1** — Halaman Konflik (`/sesi/:id/konflik`): tombol "Periksa Konflik", ringkasan (n ERROR, n WARNING), tabel konflik dengan kolom: jenis, severity, pesan, terlibat, status resolved
-- [ ] **T7.5.2** — Aksi "Tandai Resolved" per baris konflik (akses: `EDITOR_ROLES_JURUSAN`)
-- [ ] **T7.5.3** — Filter konflik berdasarkan jenis dan severity
+- [~] **T7.5.1** — Halaman Konflik (`/sesi/:id/konflik`): tombol "Periksa Konflik", ringkasan (n ERROR, n WARNING), tabel konflik dengan kolom: jenis, severity, pesan, terlibat, status resolved
+- [~] **T7.5.2** — Aksi "Tandai Resolved" per baris konflik (akses: `EDITOR_ROLES_JURUSAN`)
+- [~] **T7.5.3** — Filter konflik berdasarkan jenis dan severity
 
 ### 7.6 Halaman Laporan
 
