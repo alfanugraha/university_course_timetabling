@@ -10,6 +10,10 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Render free tier spins down after 15 min idle; first request after cold
+  // start can take ~30 s. Cap at 40 s so the UI shows an error instead of
+  // hanging indefinitely.
+  timeout: 40_000,
 })
 
 apiClient.interceptors.request.use((config) => {
